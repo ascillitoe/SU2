@@ -64,7 +64,7 @@ AC_PROG_CXX
 AM_PATH_PYTHON
 AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
 AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
-AC_ARG_VAR([PYTHON_LIB], [Python lib flags])
+AC_ARG_VAR([PYTHON_LIBS], [Python lib flags])
 AC_ARG_VAR([PYTHON_EXEC_PREFIX], [Python exec-prefix])
 AS_IF([test -z "$PYTHON_INCLUDE"], [
   AS_IF([test -z "$PYTHON_CONFIG"], [
@@ -76,7 +76,7 @@ AS_IF([test -z "$PYTHON_INCLUDE"], [
   ])
   AC_MSG_CHECKING([python include flags])
   PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
-  PYTHON_LIB=`$PYTHON_CONFIG --libs`
+  PYTHON_LIBS=`$PYTHON_CONFIG --libs`
   PYTHON_EXEC_PREFIX=`$PYTHON_CONFIG --exec-prefix`
   AC_MSG_RESULT([$PYTHON_INCLUDE])
 ])
