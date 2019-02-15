@@ -3129,7 +3129,7 @@ public:
 
   /*!
    * \brief Perturb the Reynolds stress tensor based on parameters
-   * \param[in] turb_ke: turbulent kinetic energy of the noce
+   * \param[in] turb_ke: turbulent kinetic energy of the node
    * \param[in] Eig_Val_Comp: Defines type of eigenspace perturbation
    * \param[in] beta_delta: Defines the amount of eigenvalue perturbation
    */
@@ -3140,6 +3140,13 @@ public:
    * \param[in] S_ij
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij);
+
+    /*!
+   * \brief Calculate TKE from nu_tilde using Bradshaw hypothesis
+   * \param[in] config - Definition of the particular problem.
+   * \param[out] turb_ke: turbulent kinetic energy of the node
+   */
+  void SetTKEfromSA(CConfig *config, su2double &turb_ke);
 };
 
 /*!
@@ -3196,7 +3203,7 @@ public:
 
   /*!
    * \brief Perturb the Reynolds stress tensor based on parameters
-   * \param[in] turb_ke: turbulent kinetic energy of the noce
+   * \param[in] turb_ke: turbulent kinetic energy of the node
    * \param[in] Eig_Val_Comp: Defines type of eigenspace perturbation
    * \param[in] beta_delta: Defines the amount of eigenvalue perturbation
    */
@@ -3207,6 +3214,13 @@ public:
    * \param[in] S_ij
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij);
+
+    /*!
+   * \brief Calculate TKE from nu_tilde using Bradshaw hypothesis
+   * \param[in] config - Definition of the particular problem.
+   * \param[out] turb_ke: turbulent kinetic energy of the node
+   */
+  void SetTKEfromSA(CConfig *config, su2double &turb_ke);
 };
 
 /*!
@@ -3559,7 +3573,7 @@ public:
 
   /*!
    * \brief Perturb the Reynolds stress tensor based on parameters
-   * \param[in] turb_ke: turbulent kinetic energy of the noce
+   * \param[in] turb_ke: turbulent kinetic energy of the node
    * \param[in] Eig_Val_Comp: Defines type of eigenspace perturbation
    * \param[in] beta_delta: Defines the amount of eigenvalue perturbation
    */
@@ -3571,6 +3585,12 @@ public:
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij);
 
+  /*!
+   * \brief Calculate TKE from nu_tilde using Bradshaw hypothesis
+   * \param[in] config - Definition of the particular problem.
+   * \param[out] turb_ke: turbulent kinetic energy of the node
+   */
+  void SetTKEfromSA(CConfig *config, su2double &turb_ke);
 };
 
 
@@ -3628,7 +3648,7 @@ public:
 
   /*!
    * \brief Perturb the Reynolds stress tensor based on parameters
-   * \param[in] turb_ke: turbulent kinetic energy of the noce
+   * \param[in] turb_ke: turbulent kinetic energy of the node
    * \param[in] Eig_Val_Comp: Defines type of eigenspace perturbation
    * \param[in] beta_delta: Defines the amount of eigenvalue perturbation
    */
@@ -3639,6 +3659,13 @@ public:
    * \param[in] S_ij
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij);
+
+    /*!
+   * \brief Calculate TKE from nu_tilde using Bradshaw hypothesis
+   * \param[in] config - Definition of the particular problem.
+   * \param[out] turb_ke: turbulent kinetic energy of the node
+   */
+  void SetTKEfromSA(CConfig *config, su2double &turb_ke);
 };
 
 /*!

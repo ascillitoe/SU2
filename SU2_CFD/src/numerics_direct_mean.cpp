@@ -4422,9 +4422,16 @@ void CAvgGrad_Flow::ComputeResidual(su2double *val_residual, su2double **val_Jac
 
   /* --- If using UQ methodology, set Reynolds Stress tensor and perform perturbation--- */
 
-  if (using_uq){
-    SetReynoldsStressMatrix(Mean_turb_ke);
-    SetPerturbedRSM(Mean_turb_ke, config);
+    if (using_uq){
+    if (config->GetKind_Turb_Model() == SST){
+      SetReynoldsStressMatrix(Mean_turb_ke);
+      SetPerturbedRSM(Mean_turb_ke, config);
+    } else if (config->GetKind_Turb_Model() == SA){
+      su2double turb_ke_SA;
+      SetTKEfromSA(config, turb_ke_SA);
+      SetReynoldsStressMatrix(turb_ke_SA);
+      SetPerturbedRSM(turb_ke_SA, config);
+    }
   }
 
   /*--- Get projected flux tensor ---*/
@@ -4626,6 +4633,30 @@ void CAvgGrad_Flow::SetPerturbedRSM(su2double turb_ke, CConfig *config){
 
 }
 
+void CAvgGrad_Flow::SetTKEfromSA(CConfig *config, su2double &turb_ke){
+
+  su2double mu, nu, nu_tilde, cv1_3, Ji_3, cmu, fv1, StrainMag, density;
+
+  /* Set SA model constants */
+  cmu = 0.09;
+  cv1_3 = pow(7.1, 3.0);
+
+  /* Average i,j values */
+  mu = 0.5*(Laminar_Viscosity_i+Laminar_Viscosity_j);
+  density = Mean_PrimVar[nDim+2];
+  nu_tilde = 0.5*(TurbVar_i[0] + TurbVar_j[0]);
+  StrainMag = 0.5*(StrainMag_i + StrainMag_j);
+
+  /* Calc SA damping constant fv1 */
+  nu = mu/density;
+  Ji_3 = pow(nu_tilde/nu, 3.0);
+  fv1 = Ji_3/(Ji_3+cv1_3);
+
+  /* Calc TKE from SA variable */
+  turb_ke = pow(fv1,1.0/3.0)*nu_tilde*StrainMag/sqrt(cmu);
+
+}
+
 CGeneralAvgGrad_Flow::CGeneralAvgGrad_Flow(unsigned short val_nDim, unsigned short val_nVar, CConfig *config) : CNumerics(val_nDim, val_nVar, config) {
   
   implicit = (config->GetKind_TimeIntScheme_Flow() == EULER_IMPLICIT);
@@ -4716,9 +4747,16 @@ void CGeneralAvgGrad_Flow::ComputeResidual(su2double *val_residual, su2double **
 
   /* --- If using UQ methodology, set Reynolds Stress tensor and perform perturbation--- */
 
-  if (using_uq){
-    SetReynoldsStressMatrix(Mean_turb_ke);
-    SetPerturbedRSM(Mean_turb_ke, config);
+    if (using_uq){
+    if (config->GetKind_Turb_Model() == SST){
+      SetReynoldsStressMatrix(Mean_turb_ke);
+      SetPerturbedRSM(Mean_turb_ke, config);
+    } else if (config->GetKind_Turb_Model() == SA){
+      su2double turb_ke_SA;
+      SetTKEfromSA(config, turb_ke_SA);
+      SetReynoldsStressMatrix(turb_ke_SA);
+      SetPerturbedRSM(turb_ke_SA, config);
+    }
   }
   
   /*--- Get projected flux tensor ---*/
@@ -4913,6 +4951,30 @@ void CGeneralAvgGrad_Flow::SetPerturbedRSM(su2double turb_ke, CConfig *config){
 
 }
 
+void CGeneralAvgGrad_Flow::SetTKEfromSA(CConfig *config, su2double &turb_ke){
+
+  su2double mu, nu, nu_tilde, cv1_3, Ji_3, cmu, fv1, StrainMag, density;
+
+  /* Set SA model constants */
+  cmu = 0.09;
+  cv1_3 = pow(7.1, 3.0);
+
+  /* Average i,j values */
+  mu = 0.5*(Laminar_Viscosity_i+Laminar_Viscosity_j);
+  density = Mean_PrimVar[nDim+2];
+  nu_tilde = 0.5*(TurbVar_i[0] + TurbVar_j[0]);
+  StrainMag = 0.5*(StrainMag_i + StrainMag_j);
+
+  /* Calc SA damping constant fv1 */
+  nu = mu/density;
+  Ji_3 = pow(nu_tilde/nu, 3.0);
+  fv1 = Ji_3/(Ji_3+cv1_3);
+
+  /* Calc TKE from SA variable */
+  turb_ke = pow(fv1,1.0/3.0)*nu_tilde*StrainMag/sqrt(cmu);
+
+}
+
 CAvgGradCorrected_Flow::CAvgGradCorrected_Flow(unsigned short val_nDim, unsigned short val_nVar, CConfig *config) : CNumerics(val_nDim, val_nVar, config) {
 
   implicit = (config->GetKind_TimeIntScheme_Flow() == EULER_IMPLICIT);
@@ -4926,7 +4988,7 @@ CAvgGradCorrected_Flow::CAvgGradCorrected_Flow(unsigned short val_nDim, unsigned
   for (iVar = 0; iVar < nDim+1; iVar++)
     Mean_GradPrimVar[iVar] = new su2double [nDim];
   Edge_Vector = new su2double [nDim];
-  
+
 }
 CAvgGradCorrected_Flow::~CAvgGradCorrected_Flow(void) {
 
@@ -5018,8 +5080,15 @@ void CAvgGradCorrected_Flow::ComputeResidual(su2double *val_residual, su2double 
   /* --- If using UQ methodology, set Reynolds Stress tensor and perform perturbation--- */
 
   if (using_uq){
-    SetReynoldsStressMatrix(Mean_turb_ke);
-    SetPerturbedRSM(Mean_turb_ke, config);
+    if (config->GetKind_Turb_Model() == SST){
+      SetReynoldsStressMatrix(Mean_turb_ke);
+      SetPerturbedRSM(Mean_turb_ke, config);
+    } else if (config->GetKind_Turb_Model() == SA){
+      su2double turb_ke_SA;
+      SetTKEfromSA(config, turb_ke_SA);
+      SetReynoldsStressMatrix(turb_ke_SA);
+      SetPerturbedRSM(turb_ke_SA, config);
+    }
   }
 
   GetViscousProjFlux(Mean_PrimVar, Mean_GradPrimVar, Mean_turb_ke, Normal, Mean_Laminar_Viscosity, Mean_Eddy_Viscosity, Mean_TauWall, QCR);
@@ -5090,7 +5159,6 @@ void CAvgGradCorrected_Flow::SetReynoldsStressMatrix(su2double turb_ke){
   su2double density;
   su2double TWO3 = 2.0/3.0;
   density = Mean_PrimVar[nDim+2];
-
   for (iDim = 0; iDim < 3; iDim++){
     S_ij[iDim] = new su2double [3];
   }
@@ -5214,6 +5282,30 @@ void CAvgGradCorrected_Flow::SetPerturbedRSM(su2double turb_ke, CConfig *config)
 
 }
 
+void CAvgGradCorrected_Flow::SetTKEfromSA(CConfig *config, su2double &turb_ke){
+
+  su2double mu, nu, nu_tilde, cv1_3, Ji_3, cmu, fv1, StrainMag, density;
+
+  /* Set SA model constants */
+  cmu = 0.09;
+  cv1_3 = pow(7.1, 3.0);
+
+  /* Average i,j values */
+  mu = 0.5*(Laminar_Viscosity_i+Laminar_Viscosity_j);
+  density = Mean_PrimVar[nDim+2];
+  nu_tilde = 0.5*(TurbVar_i[0] + TurbVar_j[0]);
+  StrainMag = 0.5*(StrainMag_i + StrainMag_j);
+
+  /* Calc SA damping constant fv1 */
+  nu = mu/density;
+  Ji_3 = pow(nu_tilde/nu, 3.0);
+  fv1 = Ji_3/(Ji_3+cv1_3);
+
+  /* Calc TKE from SA variable */
+  turb_ke = pow(fv1,1.0/3.0)*nu_tilde*StrainMag/sqrt(cmu);
+
+}
+
 CGeneralAvgGradCorrected_Flow::CGeneralAvgGradCorrected_Flow(unsigned short val_nDim, unsigned short val_nVar, CConfig *config) : CNumerics(val_nDim, val_nVar, config) {
   
   implicit = (config->GetKind_TimeIntScheme_Flow() == EULER_IMPLICIT);
@@ -5324,8 +5416,15 @@ void CGeneralAvgGradCorrected_Flow::ComputeResidual(su2double *val_residual, su2
   /* --- If using UQ methodology, set Reynolds Stress tensor and perform perturbation--- */
 
   if (using_uq){
-    SetReynoldsStressMatrix(Mean_turb_ke);
-    SetPerturbedRSM(Mean_turb_ke, config);
+    if (config->GetKind_Turb_Model() == SST){
+      SetReynoldsStressMatrix(Mean_turb_ke);
+      SetPerturbedRSM(Mean_turb_ke, config);
+    } else if (config->GetKind_Turb_Model() == SA){
+      su2double turb_ke_SA;
+      SetTKEfromSA(config, turb_ke_SA);
+      SetReynoldsStressMatrix(turb_ke_SA);
+      SetPerturbedRSM(turb_ke_SA, config);
+    }
   }
   
   /*--- Get projected flux tensor ---*/
@@ -5523,6 +5622,30 @@ void CGeneralAvgGradCorrected_Flow::SetPerturbedRSM(su2double turb_ke, CConfig *
       uq_urlx*(MeanPerturbedRSM[iDim][jDim] - MeanReynoldsStress[iDim][jDim]);
     }
   }
+
+}
+
+void CGeneralAvgGradCorrected_Flow::SetTKEfromSA(CConfig *config, su2double &turb_ke){
+
+  su2double mu, nu, nu_tilde, cv1_3, Ji_3, cmu, fv1, StrainMag, density;
+
+  /* Set SA model constants */
+  cmu = 0.09;
+  cv1_3 = pow(7.1, 3.0);
+
+  /* Average i,j values */
+  mu = 0.5*(Laminar_Viscosity_i+Laminar_Viscosity_j);
+  density = Mean_PrimVar[nDim+2];
+  nu_tilde = 0.5*(TurbVar_i[0] + TurbVar_j[0]);
+  StrainMag = 0.5*(StrainMag_i + StrainMag_j);
+
+  /* Calc SA damping constant fv1 */
+  nu = mu/density;
+  Ji_3 = pow(nu_tilde/nu, 3.0);
+  fv1 = Ji_3/(Ji_3+cv1_3);
+
+  /* Calc TKE from SA variable */
+  turb_ke = pow(fv1,1.0/3.0)*nu_tilde*StrainMag/sqrt(cmu);
 
 }
 

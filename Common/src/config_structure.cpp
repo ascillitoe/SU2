@@ -2310,7 +2310,7 @@ void CConfig::SetConfig_Options(unsigned short val_iZone, unsigned short val_nZo
   /* DESCRIPTION: Multipoint design freestream pressure */
   addPythonOption("MULTIPOINT_FREESTREAM_PRESSURE");
   
-  /* DESCRIPTION: Using Uncertainty Quantification with SST Turbulence Model */
+  /* DESCRIPTION: Using Uncertainty Quantification with SA or SST Turbulence Model */
   addBoolOption("USING_UQ", using_uq, false);
 
   /* DESCRIPTION: Parameter to perturb eigenvalues */
@@ -4027,10 +4027,10 @@ void CConfig::SetPostprocessing(unsigned short val_software, unsigned short val_
   	}
   }
 
-  /* --- Throw error if UQ used for any turbulence model other that SST --- */
+  /* --- Throw error if UQ used for any turbulence model other that SA or SST --- */
 
-  if (Kind_Solver == RANS && Kind_Turb_Model != SST && using_uq){
-    SU2_MPI::Error("UQ capabilities only implemented for SST turbulence model", CURRENT_FUNCTION);
+  if (Kind_Solver == RANS && Kind_Turb_Model != SST && Kind_Turb_Model != SA && using_uq){
+    SU2_MPI::Error("UQ capabilities only implemented for SA and SST turbulence models", CURRENT_FUNCTION);
   }
 
   /* --- Throw error if invalid componentiality used --- */

@@ -16098,7 +16098,7 @@ void CNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_container
   bool implicit = (config->GetKind_TimeIntScheme_Flow() == EULER_IMPLICIT);
   
   for (iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
-    
+
     /*--- Points, coordinates and normal vector in edge ---*/
     
     iPoint = geometry->edge[iEdge]->GetNode(0);
@@ -16120,7 +16120,13 @@ void CNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_container
     if (config->GetKind_Turb_Model() == SST)
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->node[iPoint]->GetSolution(0),
                                      solver_container[TURB_SOL]->node[jPoint]->GetSolution(0));
-    
+
+    //if (config->GetUsing_UQ() && config->GetKind_Turb_Model() == SA)
+      numerics->SetTurbVar(solver_container[TURB_SOL]->node[iPoint]->GetSolution(), 
+                           solver_container[TURB_SOL]->node[jPoint]->GetSolution());
+      numerics->SetStrainMag(solver_container[FLOW_SOL]->node[iPoint]->GetStrainMag(),
+                             solver_container[FLOW_SOL]->node[jPoint]->GetStrainMag());
+
     /*--- Wall shear stress values (wall functions) ---*/
     
     numerics->SetTauWall(node[iPoint]->GetTauWall(), node[iPoint]->GetTauWall());
