@@ -215,8 +215,9 @@ public:
   su2double PerturbedStrainMag;   /*!< \brief Strain magnitude calculated using perturbed stress tensor  */
   unsigned short Eig_Val_Comp;    /*!< \brief Component towards which perturbation is perfromed */
   su2double uq_delta_b;           /*!< \brief Magnitude of perturbation */
-  su2double uq_urlx;                 /*!< \brief Under-relaxation factor for numerical stability */
-  bool uq_permute;                   /*!< \brief Flag for eigenvector permutation */
+  su2double uq_urlx;              /*!< \brief Under-relaxation factor for numerical stability */
+  bool uq_permute;                /*!< \brief Flag for eigenvector permutation */
+  bool uq_exact_prod;             /*!< \brief Flag for exact production terms for SST */
 
   /* Supporting data structures for the eigenspace perturbation for UQ methodology */
   su2double **A_ij, **newA_ij, **Eig_Vec, **New_Eig_Vec, **Corners;

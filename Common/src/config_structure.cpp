@@ -2325,6 +2325,9 @@ void CConfig::SetConfig_Options(unsigned short val_iZone, unsigned short val_nZo
   /* DESCRIPTION: Permuting eigenvectors for UQ analysis */
   addBoolOption("UQ_PERMUTE", uq_permute, false);
 
+  /* DESCRIPTION: Exact production term for SST UQ analysis */
+  addBoolOption("UQ_EXACT_PROD", uq_exact_prod, false);
+
   /* END_CONFIG_OPTIONS */
 
 }
@@ -4027,10 +4030,16 @@ void CConfig::SetPostprocessing(unsigned short val_software, unsigned short val_
   	}
   }
 
-  /* --- Throw error if UQ used for any turbulence model other that SA or SST --- */
+  /* --- Throw error if UQ used for any turbulence model other than SA or SST --- */
 
-  if (Kind_Solver == RANS && Kind_Turb_Model != SST && Kind_Turb_Model != SA && using_uq){
+  if (using_uq && Kind_Turb_Model != SST && Kind_Turb_Model != SA){
     SU2_MPI::Error("UQ capabilities only implemented for SA and SST turbulence models", CURRENT_FUNCTION);
+  }
+
+    /* --- Throw error if exact production term used for anything other than SST UQ --- */
+
+  if (using_uq && uq_exact_prod && Kind_Turb_Model != SST){
+    SU2_MPI::Error("Exact production term only works with SST UQ", CURRENT_FUNCTION);
   }
 
   /* --- Throw error if invalid componentiality used --- */
@@ -4900,6 +4909,11 @@ void CConfig::SetOutput(unsigned short val_software, unsigned short val_izone) {
         if (using_uq){
           cout << "Perturbing Reynold's Stress Matrix towards "<< eig_val_comp << " component turbulence"<< endl;
           if (uq_permute) cout << "Permuting eigenvectors" << endl;  
+          if (uq_exact_prod){
+            cout << "Exact production term" << endl;
+          }else{
+            cout << "Modelled production term" << endl;
+          }
         } 
         break;
       case FEM_LES:

@@ -1229,9 +1229,9 @@ void CSourcePieceWise_TurbSST::ComputeResidual(su2double *val_residual, su2doubl
    for (iDim = 0; iDim < nDim; iDim++)
      diverg += PrimVar_Grad_i[iDim+1][iDim];
    
-   /* if using UQ methodolgy, calculate production using perturbed Reynolds stress matrix */
+   /* if exact production terms, calculate production using perturbed Reynolds stress matrix */
 
-   if (using_uq){
+   if (using_uq && uq_exact_prod){
      SetReynoldsStressMatrix(TurbVar_i[0]);
      SetPerturbedRSM(TurbVar_i[0], config);
      SetPerturbedStrainMag(TurbVar_i[0]);
@@ -1248,9 +1248,9 @@ void CSourcePieceWise_TurbSST::ComputeResidual(su2double *val_residual, su2doubl
 
    zeta = max(TurbVar_i[1], StrainMag_i*F2_i/a1);
 
-   /* if using UQ methodolgy, calculate production using perturbed Reynolds stress matrix */
+   /* if exact production terms, calculate production using perturbed Reynolds stress matrix */
 
-   if (using_uq){
+   if (using_uq && uq_exact_prod){
     pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
    }
    else {

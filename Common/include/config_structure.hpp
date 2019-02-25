@@ -1080,6 +1080,7 @@ private:
   unsigned short eig_val_comp;  /*!< \brief Parameter used to determine type of eigenvalue perturbation */
   su2double uq_urlx;            /*!< \brief Under-relaxation factor */
   bool uq_permute;              /*!< \brief Permutation of eigenvectors */
+  bool uq_exact_prod;           /*!, \brief Exact production terms for SST UQ */
 
   /*--- all_options is a map containing all of the options. This is used during config file parsing
    to track the options which have not been set (so the default values can be used). Without this map
@@ -8765,6 +8766,12 @@ public:
    */
   bool GetUQ_Permute(void);
   
+ /*!
+   * \brief Get information about UQ production terms (for SST)
+   * \return <code>TRUE</code> means exact production terms will be used (instead of modelled)
+   */
+  bool GetUQ_Exact_Prod(void);
+ 
   /*!
    * \brief Get information about whether to use wall functions.
    * \return <code>TRUE</code> if wall functions are on; otherwise <code>FALSE</code>.

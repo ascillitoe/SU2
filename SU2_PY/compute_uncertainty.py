@@ -73,6 +73,7 @@ def main():
     config.UQ_DELTA_B = options.beta_delta
     config.UQ_URLX = options.urlx
     config.UQ_PERMUTE = 'NO'
+    config.UQ_EXACT_PROD = 'NO'
 
 
     # perform eigenvalue perturbations
