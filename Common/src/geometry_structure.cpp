@@ -2,7 +2,7 @@
  * \file geometry_structure.cpp
  * \brief Main subroutines for creating the primal grid and multigrid structure.
  * \author F. Palacios, T. Economon
- * \version 6.1.0 "Falcon"
+ * \version 6.2.0 "Falcon"
  *
  * The current SU2 release has been coordinated by the
  * SU2 International Developers Society <www.su2devsociety.org>
@@ -18,7 +18,7 @@
  *  - Prof. Edwin van der Weide's group at the University of Twente.
  *  - Lab. of New Concepts in Aeronautics at Tech. Institute of Aeronautics.
  *
- * Copyright 2012-2018, Francisco D. Palacios, Thomas D. Economon,
+ * Copyright 2012-2019, Francisco D. Palacios, Thomas D. Economon,
  *                      Tim Albring, and the SU2 contributors.
  *
  * SU2 is free software; you can redistribute it and/or
@@ -1982,7 +1982,7 @@ void CGeometry::FilterValuesAtElementCG(const vector<su2double> filter_radius,
                              neighbour_start, neighbour_idx, cg_elem, neighbours);
     
       /*--- Apply the kernel ---*/
-      su2double weight, numerator = 0.0, denominator = 0.0;
+      su2double weight = 0.0, numerator = 0.0, denominator = 0.0;
     
       switch ( kernel_type ) {
         /*--- distance-based kernels (weighted averages) ---*/
@@ -15435,6 +15435,8 @@ void CPhysicalGeometry::SetMaxLength(CConfig* config) {
     node[iPoint]->SetMaxLength(max_delta);
   }
 
+  /*--- Distribute information twice for periodic boundaries ---*/
+  Set_MPI_MaxLength(config);
   Set_MPI_MaxLength(config);
 }
 
@@ -16059,160 +16061,6 @@ void CPhysicalGeometry::MatchActuator_Disk(CConfig *config) {
       
     }
   }
-  
-}
-
-void CPhysicalGeometry::MatchZone(CConfig *config, CGeometry *geometry_donor, CConfig *config_donor,
-                                  unsigned short val_iZone, unsigned short val_nZone) {
-  
-#ifndef HAVE_MPI
-  
-  unsigned short iMarker, jMarker;
-  unsigned long iVertex, iPoint, jVertex, jPoint = 0, pPoint = 0, pGlobalPoint = 0;
-  su2double *Coord_i, *Coord_j, dist = 0.0, mindist, maxdist;
-  
-//  if (val_iZone == ZONE_0) cout << "Set zone boundary conditions (if any)." << endl;
-  
-  maxdist = 0.0;
-  for (iMarker = 0; iMarker < config->GetnMarker_All(); iMarker++) {
-    for (iVertex = 0; iVertex < nVertex[iMarker]; iVertex++) {
-      iPoint = vertex[iMarker][iVertex]->GetNode();
-      Coord_i = node[iPoint]->GetCoord();
-      
-      mindist = 1E6;
-      for (jMarker = 0; jMarker < config_donor->GetnMarker_All(); jMarker++)
-        for (jVertex = 0; jVertex < geometry_donor->GetnVertex(jMarker); jVertex++) {
-          jPoint = geometry_donor->vertex[jMarker][jVertex]->GetNode();
-          Coord_j = geometry_donor->node[jPoint]->GetCoord();
-          if (nDim == 2) dist = sqrt(pow(Coord_j[0]-Coord_i[0],2.0) + pow(Coord_j[1]-Coord_i[1],2.0));
-          if (nDim == 3) dist = sqrt(pow(Coord_j[0]-Coord_i[0],2.0) + pow(Coord_j[1]-Coord_i[1],2.0) + pow(Coord_j[2]-Coord_i[2],2.0));
-//          if (dist < mindist) { mindist = dist; pPoint = jPoint; pGlobalPoint = node[jPoint]->GetGlobalIndex();}
-          if (dist < mindist) { mindist = dist; pPoint = jPoint; pGlobalPoint = geometry_donor->node[jPoint]->GetGlobalIndex();}
-        }
-      
-      maxdist = max(maxdist, mindist);
-      vertex[iMarker][iVertex]->SetDonorPoint(pPoint, MASTER_NODE, pGlobalPoint);
-      
-    }
-  }
-  
-#else
-  
-  unsigned short iMarker, iDim;
-  unsigned long iVertex, iPoint, pPoint = 0, jVertex, jPoint, jGlobalPoint = 0, pGlobalPoint = 0;
-  su2double *Coord_i, Coord_j[3], dist = 0.0, mindist, maxdist;
-  int iProcessor, pProcessor = 0;
-  unsigned long nLocalVertex_Zone = 0, nGlobalVertex_Zone = 0, MaxLocalVertex_Zone = 0;
-  int nProcessor = size;
-  
-  unsigned long *Buffer_Send_nVertex = new unsigned long [1];
-  unsigned long *Buffer_Receive_nVertex = new unsigned long [nProcessor];
-  
-//  if (val_iZone == ZONE_0 && rank == MASTER_NODE) cout << "Set zone boundary conditions (if any)." << endl;
-  
-  nLocalVertex_Zone = 0;
-  for (iMarker = 0; iMarker < config_donor->GetnMarker_All(); iMarker++)
-    for (iVertex = 0; iVertex < geometry_donor->GetnVertex(iMarker); iVertex++) {
-      iPoint = geometry_donor->vertex[iMarker][iVertex]->GetNode();
-      if (geometry_donor->node[iPoint]->GetDomain()) nLocalVertex_Zone ++;
-    }
-  
-  Buffer_Send_nVertex[0] = nLocalVertex_Zone;
-  
-  /*--- Send Interface vertex information --*/
-  
-  SU2_MPI::Allreduce(&nLocalVertex_Zone, &nGlobalVertex_Zone, 1, MPI_UNSIGNED_LONG, MPI_SUM, MPI_COMM_WORLD);
-  SU2_MPI::Allreduce(&nLocalVertex_Zone, &MaxLocalVertex_Zone, 1, MPI_UNSIGNED_LONG, MPI_MAX, MPI_COMM_WORLD);
-  SU2_MPI::Allgather(Buffer_Send_nVertex, 1, MPI_UNSIGNED_LONG, Buffer_Receive_nVertex, 1, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
-  
-  su2double *Buffer_Send_Coord = new su2double [MaxLocalVertex_Zone*nDim];
-  unsigned long *Buffer_Send_Point = new unsigned long [MaxLocalVertex_Zone];
-  unsigned long *Buffer_Send_GlobalPoint = new unsigned long [MaxLocalVertex_Zone];
-  
-  su2double *Buffer_Receive_Coord = new su2double [nProcessor*MaxLocalVertex_Zone*nDim];
-  unsigned long *Buffer_Receive_Point = new unsigned long [nProcessor*MaxLocalVertex_Zone];
-  unsigned long *Buffer_Receive_GlobalPoint = new unsigned long [nProcessor*MaxLocalVertex_Zone];
-  
-  unsigned long nBuffer_Coord = MaxLocalVertex_Zone*nDim;
-  unsigned long nBuffer_Point = MaxLocalVertex_Zone;
-  
-
-  for (iVertex = 0; iVertex < MaxLocalVertex_Zone; iVertex++) {
-    Buffer_Send_Point[iVertex] = 0;
-    Buffer_Send_GlobalPoint[iVertex] = 0;
-    for (iDim = 0; iDim < nDim; iDim++)
-      Buffer_Send_Coord[iVertex*nDim+iDim] = 0.0;
-  }
-  
-  /*--- Copy coordinates and point to the auxiliar vector --*/
-  nLocalVertex_Zone = 0;
-  for (iMarker = 0; iMarker < config_donor->GetnMarker_All(); iMarker++)
-    for (iVertex = 0; iVertex < geometry_donor->GetnVertex(iMarker); iVertex++) {
-      iPoint = geometry_donor->vertex[iMarker][iVertex]->GetNode();
-      if (geometry_donor->node[iPoint]->GetDomain()) {
-        Buffer_Send_Point[nLocalVertex_Zone] = iPoint;
-        Buffer_Send_GlobalPoint[nLocalVertex_Zone] = geometry_donor->node[iPoint]->GetGlobalIndex();
-        for (iDim = 0; iDim < nDim; iDim++)
-          Buffer_Send_Coord[nLocalVertex_Zone*nDim+iDim] = geometry_donor->node[iPoint]->GetCoord(iDim);
-        nLocalVertex_Zone++;
-      }
-    }
-  
-  SU2_MPI::Allgather(Buffer_Send_Coord, nBuffer_Coord, MPI_DOUBLE, Buffer_Receive_Coord, nBuffer_Coord, MPI_DOUBLE, MPI_COMM_WORLD);
-  SU2_MPI::Allgather(Buffer_Send_Point, nBuffer_Point, MPI_UNSIGNED_LONG, Buffer_Receive_Point, nBuffer_Point, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
-  SU2_MPI::Allgather(Buffer_Send_GlobalPoint, nBuffer_Point, MPI_UNSIGNED_LONG, Buffer_Receive_GlobalPoint, nBuffer_Point, MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
-
-  /*--- Compute the closest point to a Near-Field boundary point ---*/
-  maxdist = 0.0;
-  for (iMarker = 0; iMarker < config->GetnMarker_All(); iMarker++) {
-    for (iVertex = 0; iVertex < nVertex[iMarker]; iVertex++) {
-      iPoint = vertex[iMarker][iVertex]->GetNode();
-      
-      if (node[iPoint]->GetDomain()) {
-        
-        /*--- Coordinates of the boundary point ---*/
-        Coord_i = node[iPoint]->GetCoord(); mindist = 1E6; pProcessor = 0; pPoint = 0;
-        
-        /*--- Loop over all the boundaries to find the pair ---*/
-        for (iProcessor = 0; iProcessor < nProcessor; iProcessor++)
-          for (jVertex = 0; jVertex < Buffer_Receive_nVertex[iProcessor]; jVertex++) {
-            jPoint = Buffer_Receive_Point[iProcessor*MaxLocalVertex_Zone+jVertex];
-            jGlobalPoint = Buffer_Receive_GlobalPoint[iProcessor*MaxLocalVertex_Zone+jVertex];
-
-            /*--- Compute the distance ---*/
-            dist = 0.0; for (iDim = 0; iDim < nDim; iDim++) {
-              Coord_j[iDim] = Buffer_Receive_Coord[(iProcessor*MaxLocalVertex_Zone+jVertex)*nDim+iDim];
-              dist += pow(Coord_j[iDim]-Coord_i[iDim],2.0);
-            } dist = sqrt(dist);
-            
-            if (((dist < mindist) && (iProcessor != rank)) ||
-                ((dist < mindist) && (iProcessor == rank) && (jPoint != iPoint))) {
-              mindist = dist; pProcessor = iProcessor; pPoint = jPoint;
-              pGlobalPoint = jGlobalPoint;
-            }
-          }
-        
-        /*--- Store the value of the pair ---*/
-        maxdist = max(maxdist, mindist);
-        vertex[iMarker][iVertex]->SetDonorPoint(pPoint, pProcessor, pGlobalPoint);
-        
-        
-      }
-    }
-  }
-  
-  delete[] Buffer_Send_Coord;
-  delete[] Buffer_Send_Point;
-  delete[] Buffer_Send_GlobalPoint;
-  
-  delete[] Buffer_Receive_Coord;
-  delete[] Buffer_Receive_Point;
-  delete[] Buffer_Receive_GlobalPoint;
-  
-  delete[] Buffer_Send_nVertex;
-  delete[] Buffer_Receive_nVertex;
-  
-#endif
   
 }
 
@@ -18643,6 +18491,13 @@ void CPhysicalGeometry::SetSensitivity(CConfig *config) {
   bool sa = (config->GetKind_Turb_Model() == SA) || (config->GetKind_Turb_Model() == SA_NEG);
   bool grid_movement = config->GetGrid_Movement();
   bool frozen_visc = config->GetFrozen_Visc_Disc();
+  unsigned short Kind_Solver = config->GetKind_Solver();
+  bool flow = ((Kind_Solver == DISC_ADJ_EULER)          ||
+               (Kind_Solver == DISC_ADJ_RANS)           ||
+               (Kind_Solver == DISC_ADJ_NAVIER_STOKES)  ||
+               (Kind_Solver == ADJ_EULER)               ||
+               (Kind_Solver == ADJ_NAVIER_STOKES)       ||
+               (Kind_Solver == ADJ_RANS));
   su2double Sens, dull_val, AoASens;
   unsigned short nExtIter, iDim;
   unsigned long iPoint, index;
@@ -18662,11 +18517,19 @@ void CPhysicalGeometry::SetSensitivity(CConfig *config) {
   
   unsigned short skipVar = nDim, skipMult = 1;
 
-  if (incompressible)      { skipVar += skipMult*(nDim+2); }
-  if (compressible)        { skipVar += skipMult*(nDim+2); }
-  if (sst && !frozen_visc) { skipVar += skipMult*2;}
-  if (sa && !frozen_visc)  { skipVar += skipMult*1;}
-  if (grid_movement)       { skipVar += nDim;}
+  if (flow) {
+    if (incompressible)      { skipVar += skipMult*(nDim+2); }
+    if (compressible)        { skipVar += skipMult*(nDim+2); }
+    if (sst && !frozen_visc) { skipVar += skipMult*2;}
+    if (sa && !frozen_visc)  { skipVar += skipMult*1;}
+    if (grid_movement)       { skipVar += nDim;}
+  }
+  else if (Kind_Solver == DISC_ADJ_HEAT) {
+    skipVar += 1;
+  }
+  else {
+    cout << "WARNING: Reading in sensitivities not defined for specified solver!" << endl;
+  }
 
   /*--- Read all lines in the restart file ---*/
   long iPoint_Local; unsigned long iPoint_Global = 0; string text_line;
