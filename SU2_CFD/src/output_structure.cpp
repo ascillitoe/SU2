@@ -12874,6 +12874,12 @@ void COutput::LoadLocalData_Flow(CConfig *config, CGeometry *geometry, CSolver *
       nVar_Par +=1;
       Variable_Names.push_back("Roe_Dissipation");
     }
+
+    /*--- Add requires for Machine Learning post-proc ---*/
+    if (config->GetWrt_ML()){
+      nVar_Par +=1;
+      Variable_Names.push_back("Wall_Distance");
+    }
     
     /*--- New variables get registered here before the end of the loop. ---*/
     
@@ -13105,6 +13111,11 @@ void COutput::LoadLocalData_Flow(CConfig *config, CGeometry *geometry, CSolver *
         
         if (config->GetKind_RoeLowDiss() != NO_ROELOWDISS){
           Local_Data[jPoint][iVar] = solver[FLOW_SOL]->node[iPoint]->GetRoe_Dissipation(); iVar++;
+        }
+        
+        /* Load data for machine learning features */
+        if (config->GetWrt_ML()) {
+          Local_Data[jPoint][iVar] = geometry->node[iPoint]->GetWall_Distance(); iVar++;
         }
         
         /*--- New variables can be loaded to the Local_Data structure here,
@@ -13398,6 +13409,12 @@ void COutput::LoadLocalData_IncFlow(CConfig *config, CGeometry *geometry, CSolve
       Variable_Names.push_back("Thermal_Conductivity");
     }
     
+    /*--- Add variables for machine learning features ---*/
+    if (config->GetWrt_ML()){
+      nVar_Par +=1;
+      Variable_Names.push_back("Wall_Distance");
+    }
+
     /*--- New variables get registered here before the end of the loop. ---*/
 
   }
@@ -13632,6 +13649,11 @@ void COutput::LoadLocalData_IncFlow(CConfig *config, CGeometry *geometry, CSolve
         
         if (wrt_kt) {
           Local_Data[jPoint][iVar] = solver[FLOW_SOL]->node[iPoint]->GetThermalConductivity(); iVar++;
+        }
+
+      /* Load data for machine learning features */
+        if (config->GetWrt_ML()) {
+          Local_Data[jPoint][iVar] = geometry->node[iPoint]->GetWall_Distance(); iVar++;
         }
         
         /*--- New variables can be loaded to the Local_Data structure here,

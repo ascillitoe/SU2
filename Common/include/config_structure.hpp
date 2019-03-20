@@ -768,6 +768,7 @@ private:
   Wrt_InletFile,                   /*!< \brief Write a template inlet profile file */
   Wrt_Slice,                   /*!< \brief Write 1D slice of a 2D cartesian solution */
   Wrt_Projected_Sensitivity,   /*!< \brief Write projected sensitivities (dJ/dx) on surfaces to ASCII file. */
+  Wrt_ML,                    /*!< \brief Write variables for machine learning features to solution file. */
   Plot_Section_Forces;       /*!< \brief Write sectional forces for specified markers. */
   unsigned short Console_Output_Verb,  /*!< \brief Level of verbosity for console output */
   Kind_Average;        /*!< \brief Particular average for the marker analyze. */
@@ -3271,6 +3272,12 @@ public:
    */
   bool GetWrt_Projected_Sensitivity(void);
   
+    /*!
+   * \brief Get information about writing variables for machine learning features.
+   * \return <code>TRUE</code> means that variables required for machine learning features will be written to solution file.
+   */
+  bool GetWrt_ML(void);
+
   /*!
    * \brief Get information about the format for the input volume sensitvities.
    * \return Format of the input volume sensitivities.
