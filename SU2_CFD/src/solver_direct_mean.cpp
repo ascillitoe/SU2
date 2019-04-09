@@ -13448,7 +13448,7 @@ void CEulerSolver::BC_ActDisk(CGeometry *geometry, CSolver **solver_container, C
 void CEulerSolver::BC_Dirichlet(CGeometry *geometry, CSolver **solver_container,
                                 CConfig *config, unsigned short val_marker) { }
 
-void CEulerSolver::BC_Custom(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config, unsigned short val_marker) { }
+void CEulerSolver::BC_Custom(CGeometry *geometry, CSolver **solver_container, CNumerics *conv_numerics, CNumerics *visc_numerics,  CConfig *config, unsigned short val_marker) { }
 
 void CEulerSolver::SetResidual_DualTime(CGeometry *geometry, CSolver **solver_container, CConfig *config,
                                         unsigned short iRKStep, unsigned short iMesh, unsigned short RunTime_EqSystem) {

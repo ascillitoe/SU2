@@ -172,6 +172,9 @@ void CIntegration::Space_Integration(CGeometry *geometry,
       case NEUMANN:
         solver_container[MainSolver]->BC_Neumann(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
         break;
+      case CUSTOM_BOUNDARY:
+        solver_container[MainSolver]->BC_Custom(geometry, solver_container, numerics[CONV_BOUND_TERM], numerics[VISC_BOUND_TERM], config, iMarker);
+        break;
       case LOAD_DIR_BOUNDARY:
         solver_container[MainSolver]->BC_Dir_Load(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
         break;
@@ -196,9 +199,6 @@ void CIntegration::Space_Integration(CGeometry *geometry,
         break;
       case CLAMPED_BOUNDARY:
         solver_container[MainSolver]->BC_Clamped(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
-        break;
-      case CUSTOM_BOUNDARY:
-        solver_container[MainSolver]->BC_Custom(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
         break;
       case CHT_WALL_INTERFACE: 
         if ((MainSolver == HEAT_SOL) || (MainSolver == FLOW_SOL && ((config->GetKind_Regime() == COMPRESSIBLE) || config->GetEnergy_Equation()))) {

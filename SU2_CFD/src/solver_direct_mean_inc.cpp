@@ -6451,7 +6451,152 @@ void CIncEulerSolver::BC_Fluid_Interface(CGeometry *geometry, CSolver **solver_c
   delete [] PrimVar_j;
 }
 
-void CIncEulerSolver::BC_Custom(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config, unsigned short val_marker) { }
+/*--- Boundary condition to replciate OpenFoam's ZeroGradient boundary condition ---*/  
+void CIncEulerSolver::BC_Custom(CGeometry *geometry, CSolver **solver_container, CNumerics *conv_numerics, CNumerics *visc_numerics, CConfig *config, unsigned short val_marker) {
+ 
+  unsigned short iDim;
+  unsigned long iVertex, iPoint;
+  unsigned long Point_Normal;
+  su2double *Flow_Dir, Flow_Dir_Mag, Vel_Mag, Area, P_total, P_domain, Vn;
+  su2double *V_inlet, *V_domain;
+  su2double UnitFlowDir[3] = {0.0,0.0,0.0};
+  su2double dV[3] = {0.0,0.0,0.0};
+
+  bool implicit      = (config->GetKind_TimeIntScheme_Flow() == EULER_IMPLICIT);
+  bool grid_movement = config->GetGrid_Movement();
+  bool viscous       = config->GetViscous();
+
+  su2double *Normal = new su2double[nDim];
+
+  /*--- Loop over all the vertices on this boundary marker ---*/
+  
+  for (iVertex = 0; iVertex < geometry->nVertex[val_marker]; iVertex++) {
+    
+    /*--- Allocate the value at the inlet ---*/
+    
+    V_inlet = GetCharacPrimVar(val_marker, iVertex);
+    
+    iPoint = geometry->vertex[val_marker][iVertex]->GetNode();
+    
+    /*--- Check if the node belongs to the domain (i.e., not a halo node) ---*/
+    
+    if (geometry->node[iPoint]->GetDomain()) {
+
+      /*--- Index of the closest interior node ---*/
+
+      Point_Normal = geometry->vertex[val_marker][iVertex]->GetNormal_Neighbor();
+      
+      /*--- Normal vector for this vertex (negate for outward convention) ---*/
+      
+      geometry->vertex[val_marker][iVertex]->GetNormal(Normal);
+      for (iDim = 0; iDim < nDim; iDim++) Normal[iDim] = -Normal[iDim];
+      conv_numerics->SetNormal(Normal);
+      
+      Area = 0.0;
+      for (iDim = 0; iDim < nDim; iDim++) Area += Normal[iDim]*Normal[iDim];
+      Area = sqrt (Area);
+
+      /*--- Retrieve solution at this boundary node. ---*/
+      
+      V_domain = node[iPoint]->GetPrimitive();
+
+      /*--- Neumann condition for static pressure ---*/
+      
+      V_inlet[0] = node[iPoint]->GetPressure();
+      
+      /*--- Neumann condition for velocity. ---*/
+            
+      for (iDim = 0; iDim < nDim; iDim++)
+        V_inlet[iDim+1] = V_domain[iDim+1];
+            
+      /*--- Neumann condition for the temperature (if energy is active) ---*/
+            
+      V_inlet[nDim+1] = node[iPoint]->GetTemperature();
+            
+      /*--- Access density at the node. This is either constant by
+        construction, or will be set fixed implicitly by the temperature
+        and equation of state. ---*/
+
+      V_inlet[nDim+2] = node[iPoint]->GetDensity();
+
+      /*--- Beta coefficient from the config file ---*/
+
+      V_inlet[nDim+3] = node[iPoint]->GetBetaInc2();
+
+      /*--- Cp is needed for Temperature equation. ---*/
+
+      V_inlet[nDim+7] = node[iPoint]->GetSpecificHeatCp();
+
+      /*--- Set various quantities in the solver class ---*/
+      
+      conv_numerics->SetPrimitive(V_domain, V_inlet);
+      
+      if (grid_movement)
+        conv_numerics->SetGridVel(geometry->node[iPoint]->GetGridVel(),
+                                  geometry->node[iPoint]->GetGridVel());
+      
+      /*--- Compute the residual using an upwind scheme ---*/
+      
+      conv_numerics->ComputeResidual(Residual, Jacobian_i, Jacobian_j, config);
+      
+      /*--- Update residual value ---*/
+      
+      LinSysRes.AddBlock(iPoint, Residual);
+      
+      /*--- Jacobian contribution for implicit integration ---*/
+      
+      if (implicit)
+        Jacobian.AddBlock(iPoint, iPoint, Jacobian_i);
+
+      /*--- Viscous contribution ---*/
+
+      if (viscous) {
+        
+        /*--- Set transport properties at the inlet ---*/
+        
+        V_inlet[nDim+4] = node[iPoint]->GetLaminarViscosity();
+        V_inlet[nDim+5] = node[iPoint]->GetEddyViscosity();
+        V_inlet[nDim+6] = node[iPoint]->GetThermalConductivity();
+
+        /*--- Set the normal vector and the coordinates ---*/
+        
+        visc_numerics->SetNormal(Normal);
+        visc_numerics->SetCoord(geometry->node[iPoint]->GetCoord(),
+                                geometry->node[Point_Normal]->GetCoord());
+        
+        /*--- Primitive variables, and gradient ---*/
+        
+        visc_numerics->SetPrimitive(V_domain, V_inlet);
+        visc_numerics->SetPrimVarGradient(node[iPoint]->GetGradient_Primitive(),
+                                          node[iPoint]->GetGradient_Primitive());
+        
+        /*--- Turbulent kinetic energy ---*/
+        
+        if (config->GetKind_Turb_Model() == SST)
+          visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->node[iPoint]->GetSolution(0),
+                                              solver_container[TURB_SOL]->node[iPoint]->GetSolution(0));
+        
+        /*--- Compute and update residual ---*/
+        
+        visc_numerics->ComputeResidual(Residual, Jacobian_i, Jacobian_j, config);
+        
+        LinSysRes.SubtractBlock(iPoint, Residual);
+        
+        /*--- Jacobian contribution for implicit integration ---*/
+        
+        if (implicit)
+          Jacobian.SubtractBlock(iPoint, iPoint, Jacobian_i);
+        
+      }
+
+    }
+  }
+  
+  /*--- Free locally allocated memory ---*/
+  
+  delete [] Normal;
+  
+}
 
 void CIncEulerSolver::SetResidual_DualTime(CGeometry *geometry, CSolver **solver_container, CConfig *config,
                                         unsigned short iRKStep, unsigned short iMesh, unsigned short RunTime_EqSystem) {
