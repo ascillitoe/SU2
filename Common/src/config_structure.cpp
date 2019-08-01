@@ -1689,6 +1689,9 @@ void CConfig::SetConfig_Options(unsigned short val_iZone, unsigned short val_nZo
   addBoolOption("WRT_PERFORMANCE", Wrt_Performance, false);
     /* DESCRIPTION: Output a 1D slice of a 2D cartesian solution \ingroup Config*/
   addBoolOption("WRT_SLICE", Wrt_Slice, false);
+  /*!\brief WRT_ML
+   *  \n DESCRIPTION: Output variables for machine learning features to solution/restart file  \ingroup Config*/
+  addBoolOption("WRT_ML", Wrt_ML, false);
   /*!\brief MARKER_ANALYZE_AVERAGE
    *  \n DESCRIPTION: Output averaged flow values on specified analyze marker.
    *  Options: AREA, MASSFLUX

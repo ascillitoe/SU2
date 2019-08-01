@@ -1726,6 +1726,8 @@ inline bool CConfig::GetWrt_Slice(void) { return Wrt_Slice; }
 
 inline bool CConfig::GetWrt_Projected_Sensitivity(void) { return Wrt_Projected_Sensitivity; }
 
+inline bool CConfig::GetWrt_ML(void) { return Wrt_ML; }
+
 inline unsigned short CConfig::GetSensitivity_Format(void) { return Sensitivity_FileFormat; }
 
 inline bool CConfig::GetPlot_Section_Forces(void) { return Plot_Section_Forces; }
