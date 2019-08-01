@@ -78,10 +78,3 @@ TestData
 
 Mercurial
 .hg*
-
-# VS Code config files
-.vscode/
-configure_debug.sh
-
-# pyenv
-.python-version
