@@ -1115,6 +1115,12 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                      solver_container[TURB_SOL]->GetNodes()->GetSolution(jPoint,0));
 
+        /*--- Aij tensor from ML ---*/
+
+    if (config->GetUsing_SDD())
+      numerics->SetAijML(nodes->GetAijML(iPoint),
+		         nodes->GetAijML(jPoint));
+
     /*--- Compute and update residual ---*/
 
     auto residual = numerics->ComputeResidual(config);

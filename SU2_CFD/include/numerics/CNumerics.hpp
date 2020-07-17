@@ -217,9 +217,15 @@ protected:
   su2double uq_urlx;              /*!< \brief Under-relaxation factor for numerical stability */
   bool uq_permute;                /*!< \brief Flag for eigenvector permutation */
 
+  bool using_sdd;
+  bool write_sdd;
+
   /* Supporting data structures for the eigenspace perturbation for UQ methodology */
   su2double **A_ij, **newA_ij, **Eig_Vec, **New_Eig_Vec, **Corners;
   su2double *Eig_Val, *Barycentric_Coord, *New_Coord;
+
+  /* Supporting data structures for sdd-rans methodology */
+  su2double *A_ij_ML, *A_ij_ML_i, *A_ij_ML_j;
 
 public:
   /*!
@@ -545,6 +551,16 @@ public:
   inline void SetTurbKineticEnergy(su2double val_turb_ke_i, su2double val_turb_ke_j) {
     turb_ke_i = val_turb_ke_i;
     turb_ke_j = val_turb_ke_j;
+  }
+
+   /*!
+   * \brief Set the turbulent kinetic energy.
+   * \param[in] val_A_ij_ML_i - Value of A_ij_ML at point i.
+   * \param[in] val_A_ij_ML_j - Value of A_ij_ML at point j.
+   */
+  inline void SetAijML(su2double *val_A_ij_ML_i, su2double *val_A_ij_ML_j) {
+    A_ij_ML_i = val_A_ij_ML_i;
+    A_ij_ML_j = val_A_ij_ML_j;
   }
 
   /*!

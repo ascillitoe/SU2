@@ -54,6 +54,12 @@ CNumerics::CNumerics(void) {
 
   using_uq = false;
 
+  using_sdd = false;
+  write_sdd = false;
+
+  A_ij_ML = nullptr;
+  A_ij_ML_i = nullptr;
+  A_ij_ML_j = nullptr;
 }
 
 CNumerics::CNumerics(unsigned short val_nDim, unsigned short val_nVar,
@@ -146,6 +152,13 @@ CNumerics::CNumerics(unsigned short val_nDim, unsigned short val_nVar,
     Corners[2][1] = 0.866025;
   }
 
+  using_sdd = config->GetUsing_SDD();
+  if (using_sdd){
+    A_ij_ML   = new su2double [6] ();
+    A_ij_ML_i = new su2double [6] ();
+    A_ij_ML_j = new su2double [6] ();
+  }
+
 }
 
 CNumerics::~CNumerics(void) {
@@ -209,6 +222,11 @@ CNumerics::~CNumerics(void) {
     delete [] New_Coord;
   }
 
+    if (using_sdd){
+    delete [] A_ij_ML;
+    delete [] A_ij_ML_i;
+    delete [] A_ij_ML_j;
+  }
 }
 
 void CNumerics::GetInviscidFlux(su2double val_density, const su2double *val_velocity,

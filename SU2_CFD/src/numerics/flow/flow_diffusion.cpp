@@ -811,6 +811,13 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
   Mean_turb_ke              = 0.5*(turb_ke_i + turb_ke_j);
   Mean_Thermal_Conductivity = 0.5*(Thermal_Conductivity_i + Thermal_Conductivity_j);
 
+  if (using_sdd){
+    for (iVar = 0; iVar < 6; iVar++) {
+      A_ij_ML[iVar] = 0.5*(A_ij_ML_i[iVar]+A_ij_ML_j[iVar]);
+    }
+//    cout << A_ij_ML[0] << ' ' << A_ij_ML[1] << ' ' << A_ij_ML[2] << ' ' << A_ij_ML[3] << ' ' << A_ij_ML[4] << ' ' << A_ij_ML[5] << endl;
+  }
+
   /*--- Mean gradient approximation ---*/
 
   for (iVar = 0; iVar < nVar; iVar++)
