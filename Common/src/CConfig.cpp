@@ -2769,6 +2769,9 @@ void CConfig::SetConfig_Options() {
   /* DESCRIPTION: Permuting eigenvectors for UQ analysis */
   addBoolOption("UQ_PERMUTE", uq_permute, false);
 
+  /* DESCRIPTION: Using stochastic data-driven RANS Turbulence model */
+  addBoolOption("USING_SDD", using_sdd, false);
+
   /* DESCRIPTION: Number of calls to 'Build' that trigger re-factorization (0 means only once). */
   addUnsignedLongOption("PASTIX_FACTORIZATION_FREQUENCY", pastix_fact_freq, 1);
 
@@ -4460,6 +4463,12 @@ void CConfig::SetPostprocessing(unsigned short val_software, unsigned short val_
 
   if (using_uq && (eig_val_comp > 3 || eig_val_comp < 1)){
     SU2_MPI::Error("Componentality should be either 1, 2, or 3!", CURRENT_FUNCTION);
+  }
+
+  /* --- Throw error if UQ used for any turbulence model other that SST --- */
+
+  if (Kind_Solver == RANS && Kind_Turb_Model != SST && Kind_Turb_Model != SST_SUST && using_sdd){
+    SU2_MPI::Error("SDD-RANS capabilities only implemented for NAVIER_STOKES solver SST turbulence model", CURRENT_FUNCTION);
   }
 
   /*--- If there are not design variables defined in the file ---*/

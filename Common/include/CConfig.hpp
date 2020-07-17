@@ -1129,6 +1129,9 @@ private:
   su2double uq_urlx;            /*!< \brief Under-relaxation factor */
   bool uq_permute;              /*!< \brief Permutation of eigenvectors */
 
+  bool using_sdd;               /*!< \brief Using SDD-RANS i.e. reading in aij_ML and blending this in */
+  bool write_sdd;               /*!< \brief Writing out aij_BL to give to ML */
+
   unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
   unsigned short pastix_verb_lvl;  /*!< \brief Verbosity level for PaStiX */
   unsigned short pastix_fill_lvl;  /*!< \brief Fill level for PaStiX ILU */
@@ -8861,6 +8864,18 @@ public:
    * \return <code>TRUE</code> means eigenspace perterturbation will be used
    */
   bool GetUQ_Permute(void) const { return uq_permute; }
+
+   /*!
+   * \brief Get information about whether to use stochastic data-driven RANS (SDD-RANS)
+   * \return <code>TRUE</code> means that SDD-RANS will be used
+   */
+  bool GetUsing_SDD(void) const { return using_sdd; }
+
+  /*!
+   * \brief Get information about whether to use write out aij for ML training (as part of SDD-RANS)
+   * \return <code>TRUE</code> means that aij will be written out in solution file
+   */
+  bool GetWrite_SDD(void) const { return write_sdd; }
 
   /*!
    * \brief Get information about whether to use wall functions.
