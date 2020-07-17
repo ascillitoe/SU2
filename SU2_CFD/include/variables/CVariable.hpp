@@ -97,6 +97,9 @@ protected:
   su2matrix<int> AD_InputIndex;    /*!< \brief Indices of Solution variables in the adjoint vector. */
   su2matrix<int> AD_OutputIndex;   /*!< \brief Indices of Solution variables in the adjoint vector after having been updated. */
 
+   /*--- SDD-RANS turb aniso tensor definition ---*/
+  MatrixType A_ij_ML;                    /*!< \brief aij components of A_ij_ML ( a_11, a_22, a_33, a_12, a_13, a_23 ) to be read in. */
+
   unsigned long nPoint = 0;  /*!< \brief Number of points in the domain. */
   unsigned long nDim = 0;      /*!< \brief Number of dimension of the problem. */
   unsigned long nVar = 0;        /*!< \brief Number of variables of the problem. */
@@ -143,6 +146,16 @@ public:
    */
   inline void SetSolution(unsigned long iPoint, const su2double *solution) {
     for (unsigned long iVar = 0; iVar < nVar; iVar++) Solution(iPoint,iVar) = solution[iVar];
+  }
+
+    /*!
+   * \brief Set the value of the ML Aij tensor for all indices.
+   * \param[in] iPoint - Point index.
+   * \param[in] val_prim - aij value.
+   * \return Set the value of A_ij_ML for all indices.
+   */
+  inline void SetAijML(unsigned long iPoint, const su2double *val_aij) {
+    for (unsigned long iVar = 0; iVar < 6; iVar++) A_ij_ML(iPoint,iVar) = val_aij[iVar];
   }
 
   /*!
@@ -448,6 +461,13 @@ public:
    * \return Pointer to the solution vector.
    */
   inline su2double *GetSolution(unsigned long iPoint) { return Solution[iPoint]; }
+
+   /*!
+   * \brief Get the A_ij_ML at <i>iPoint<i>.
+   * \param[in] iPoint - Point index.
+   * \return Value of the A_ij_ML.
+   */
+  inline su2double *GetAijML(unsigned long iPoint) { return A_ij_ML[iPoint]; }
 
   /*!
    * \brief Get the old solution of the problem (Runge-Kutta method)

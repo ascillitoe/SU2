@@ -83,6 +83,8 @@ CIncEulerSolver::CIncEulerSolver(void) : CSolver() {
   SlidingState     = nullptr;
   SlidingStateNodes = nullptr;
 
+  //A_ij_ML = nullptr;
+
   nodes = nullptr;
 }
 
@@ -190,6 +192,8 @@ CIncEulerSolver::CIncEulerSolver(CGeometry *geometry, CConfig *config, unsigned 
 
   FluidModel = nullptr;
 
+  //A_ij_ML = nullptr;
+
   /*--- Set the gamma value ---*/
 
   Gamma = config->GetGamma();
@@ -266,6 +270,12 @@ CIncEulerSolver::CIncEulerSolver(CGeometry *geometry, CConfig *config, unsigned 
   Primitive   = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive[iVar]   = 0.0;
   Primitive_i = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive_i[iVar] = 0.0;
   Primitive_j = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive_j[iVar] = 0.0;
+
+    /*--- SDD variables ---*/
+
+//  if (config->GetUsing_SDD()) {
+//    A_ij_ML = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar]   = 0.0;
+//  }
 
   /*--- Define some auxiliary vectors related to the undivided lapalacian ---*/
 
@@ -769,6 +779,10 @@ CIncEulerSolver::~CIncEulerSolver(void) {
   }
 
   delete FluidModel;
+
+//  if (A_ij_ML != nullptr) {
+//    delete [] A_ij_ML;
+//  }
 
   delete nodes;
 }
@@ -5877,6 +5891,14 @@ void CIncEulerSolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConf
       for (iVar = 0; iVar < nVar_Restart; iVar++) Solution[iVar] = Restart_Data[index+iVar];
       nodes->SetSolution(iPoint_Local,Solution);
       iPoint_Global_Local++;
+
+      /*--- Load the anisotropy tensor if using sdd-rans.
+       TODO - Assuming A_ij after primitives and turbulence var's, probs need to fix this to work with dynamic_grid. ---*/
+      if (config->GetUsing_SDD()) {
+        index = counter*Restart_Vars[1] + skipVars + nVar_Restart + turbVars;
+        for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar] = Restart_Data[index+iVar];
+        nodes->SetAijML(iPoint_Local,A_ij_ML);
+      }
 
       /*--- For dynamic meshes, read in and store the
        grid coordinates and grid velocities for each node. ---*/

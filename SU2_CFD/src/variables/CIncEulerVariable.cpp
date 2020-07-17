@@ -127,7 +127,10 @@ CIncEulerVariable::CIncEulerVariable(su2double pressure, const su2double *veloci
   /* Non-physical point (first-order) initialization. */
   Non_Physical.resize(nPoint) = false;
   Non_Physical_Counter.resize(nPoint) = 0;
-  
+
+ if (config->GetUsing_SDD()) {
+    A_ij_ML.resize(nPoint,6) = su2double(0.0);
+  }  
 }
 
 bool CIncEulerVariable::SetPrimVar(unsigned long iPoint, CFluidModel *FluidModel) {

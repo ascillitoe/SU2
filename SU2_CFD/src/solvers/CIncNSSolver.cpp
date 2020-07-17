@@ -55,6 +55,7 @@ CIncNSSolver::CIncNSSolver(void) : CIncEulerSolver() {
   SlidingState      = nullptr;
   SlidingStateNodes = nullptr;
 
+  A_ij_ML = nullptr;
 }
 
 CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short iMesh) : CIncEulerSolver() {
@@ -128,6 +129,8 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   CMerit_Visc = nullptr;      CT_Visc = nullptr;      CQ_Visc = nullptr;
   MaxHF_Visc = nullptr; ForceViscous = nullptr; MomentViscous = nullptr;
   CSkinFriction = nullptr; HF_Visc = nullptr;
+
+  A_ij_ML = nullptr; //TODO
 
   /*--- Set the gamma value ---*/
 
@@ -479,6 +482,11 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   HF_Visc    = new su2double[nMarker];
   MaxHF_Visc = new su2double[nMarker];
 
+  /*--- SDD-RANS arrays ---*/ //TODO
+  if (config->GetUsing_SDD()) {
+    A_ij_ML  = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar]   = 0.0;
+  }
+
   /*--- Init total coefficients ---*/
 
   Total_CD       = 0.0;  Total_CL           = 0.0;  Total_CSF            = 0.0;
@@ -685,6 +693,9 @@ CIncNSSolver::~CIncNSSolver(void) {
     delete [] HeatConjugateVar;
   }
 
+  if (A_ij_ML != nullptr) { //TODO
+    delete [] A_ij_ML;
+  }
 }
 
 void CIncNSSolver::Preprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, unsigned short iMesh, unsigned short iRKStep, unsigned short RunTime_EqSystem, bool Output) {
