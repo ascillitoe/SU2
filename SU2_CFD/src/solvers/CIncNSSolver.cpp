@@ -1655,6 +1655,11 @@ void CIncNSSolver::BC_HeatFlux_Wall(CGeometry *geometry, CSolver **solver_contai
         }
       }
 
+      // TODO - Is this actually needed?
+//      if (config->GetUsing_SDD())
+//      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
+//		         nodes->GetAijML(iPoint));
+
       /*--- Store the corrected velocity at the wall which will
        be zero (v = 0), unless there are moving walls (v = u_wall)---*/
 

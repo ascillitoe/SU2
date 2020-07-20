@@ -4354,6 +4354,12 @@ void CIncEulerSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container,
         conv_numerics->SetGridVel(geometry->nodes->GetGridVel(iPoint),
                                   geometry->nodes->GetGridVel(iPoint));
 
+      /*--- Aij tensor from ML ---*/ //TODO - is this needed
+
+//      if (config->GetUsing_SDD())
+//      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
+//		         nodes->GetAijML(iPoint));
+
       /*--- Compute the residual using an upwind scheme ---*/
 
       auto residual = conv_numerics->ComputeResidual(config);
@@ -4561,6 +4567,11 @@ void CIncEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
       if (dynamic_grid)
         conv_numerics->SetGridVel(geometry->nodes->GetGridVel(iPoint),
                                   geometry->nodes->GetGridVel(iPoint));
+
+      /*--- Aij tensor from ML ---*/ //TODO - is this needed
+      if (config->GetUsing_SDD())
+      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
+		         nodes->GetAijML(iPoint));
 
       /*--- Compute the residual using an upwind scheme ---*/
 

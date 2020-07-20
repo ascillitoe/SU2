@@ -4471,6 +4471,10 @@ void CConfig::SetPostprocessing(unsigned short val_software, unsigned short val_
     SU2_MPI::Error("SDD-RANS capabilities only implemented for NAVIER_STOKES solver SST turbulence model", CURRENT_FUNCTION);
   }
 
+  if (using_uq && using_sdd){
+    SU2_MPI::Error("Cannot use USING_UQ and USING_SDD together", CURRENT_FUNCTION);
+  }
+
   /*--- If there are not design variables defined in the file ---*/
 
   if (nDV == 0) {

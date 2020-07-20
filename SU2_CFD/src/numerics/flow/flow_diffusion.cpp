@@ -815,7 +815,8 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
     for (iVar = 0; iVar < 6; iVar++) {
       A_ij_ML[iVar] = 0.5*(A_ij_ML_i[iVar]+A_ij_ML_j[iVar]);
     }
-//    cout << A_ij_ML[0] << ' ' << A_ij_ML[1] << ' ' << A_ij_ML[2] << ' ' << A_ij_ML[3] << ' ' << A_ij_ML[4] << ' ' << A_ij_ML[5] << endl;
+//    cout << A_ij_ML[0] << ' ' << A_ij_ML[1] << ' ' << A_ij_ML[2] << ' ' << A_ij_ML[3] << ' ' << A_ij_ML[4] << ' ' << A_ij_ML[5] << Mean_turb_ke << endl; //TODO - why are a few of these always zero?
+//    if (A_ij_ML[0]==0) exit(1);
   }
 
   /*--- Mean gradient approximation ---*/
