@@ -225,7 +225,7 @@ protected:
   su2double *Eig_Val, *Barycentric_Coord, *New_Coord;
 
   /* Supporting data structures for sdd-rans methodology */
-  su2double *A_ij_ML, *A_ij_ML_i, *A_ij_ML_j;
+  su2double **Aij_ML, **Aij_ML_i, **Aij_ML_j;
 
 public:
   /*!
@@ -554,13 +554,13 @@ public:
   }
 
    /*!
-   * \brief Set the turbulent kinetic energy.
-   * \param[in] val_A_ij_ML_i - Value of A_ij_ML at point i.
-   * \param[in] val_A_ij_ML_j - Value of A_ij_ML at point j.
+   * \brief Set the ML derived turbulent anisotropy. // TODO - could add SetAijBL here if neccessary?
+   * \param[in] val_Aij_ML_i - Value of Aij_ML at point i.
+   * \param[in] val_Aij_ML_j - Value of Aij_ML at point j.
    */
-  inline void SetAijML(su2double *val_A_ij_ML_i, su2double *val_A_ij_ML_j) {
-    A_ij_ML_i = val_A_ij_ML_i;
-    A_ij_ML_j = val_A_ij_ML_j;
+  inline void SetAijML(su2double **val_Aij_ML_i, su2double **val_Aij_ML_j) {
+    Aij_ML_i = val_Aij_ML_i;
+    Aij_ML_j = val_Aij_ML_j;
   }
 
   /*!

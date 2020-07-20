@@ -291,7 +291,6 @@ void CTurbSASolver::Preprocessing(CGeometry *geometry, CSolver **solver_containe
     }
 
     /*--- Compute the DES length scale ---*/
-
     SetDES_LengthScale(solver_container, geometry, config);
 
   }

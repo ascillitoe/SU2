@@ -97,8 +97,9 @@ protected:
   su2matrix<int> AD_InputIndex;    /*!< \brief Indices of Solution variables in the adjoint vector. */
   su2matrix<int> AD_OutputIndex;   /*!< \brief Indices of Solution variables in the adjoint vector after having been updated. */
 
-   /*--- SDD-RANS turb aniso tensor definition ---*/
-  MatrixType A_ij_ML;                    /*!< \brief aij components of A_ij_ML ( a_11, a_22, a_33, a_12, a_13, a_23 ) to be read in. */
+   /*--- SDD-RANS delta's ---*/
+  MatrixType delta_SDD;                    /*!< \brief delta SDD vector to be read in. Currently only eigenvalue delta's in cartesian 
+					     co-ords ( delta_zeta, delta_eta ). 6D vector to make space for log(k) and eigenvector delta's later.  */
 
   unsigned long nPoint = 0;  /*!< \brief Number of points in the domain. */
   unsigned long nDim = 0;      /*!< \brief Number of dimension of the problem. */
@@ -149,13 +150,13 @@ public:
   }
 
     /*!
-   * \brief Set the value of the ML Aij tensor for all indices.
+   * \brief Set the value of the delta_SDD vector for all indices.
    * \param[in] iPoint - Point index.
-   * \param[in] val_prim - aij value.
-   * \return Set the value of A_ij_ML for all indices.
+   * \param[in] val_delta - delta_SDD value.
+   * \return Set the value of delta_SDD for all indices.
    */
-  inline void SetAijML(unsigned long iPoint, const su2double *val_aij) {
-    for (unsigned long iVar = 0; iVar < 6; iVar++) A_ij_ML(iPoint,iVar) = val_aij[iVar];
+  inline void SetSDD(unsigned long iPoint, const su2double *val_delta) {
+    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_SDD(iPoint,iVar) = val_delta[iVar];
   }
 
   /*!
@@ -463,11 +464,11 @@ public:
   inline su2double *GetSolution(unsigned long iPoint) { return Solution[iPoint]; }
 
    /*!
-   * \brief Get the A_ij_ML at <i>iPoint<i>.
+   * \brief Get the delta_SDD at <i>iPoint<i>.
    * \param[in] iPoint - Point index.
-   * \return Value of the A_ij_ML.
+   * \return Value of the delta_SDD.
    */
-  inline su2double *GetAijML(unsigned long iPoint) { return A_ij_ML[iPoint]; }
+  inline su2double *GetSDD(unsigned long iPoint) { return delta_SDD[iPoint]; }
 
   /*!
    * \brief Get the old solution of the problem (Runge-Kutta method)
@@ -1891,6 +1892,11 @@ public:
   /*!
    * \brief A virtual member.
    */
+  inline virtual void SetAijML(unsigned long iPoint, su2double *val_delta_ssd) { }
+
+  /*!
+   * \brief A virtual member.
+   */
   inline virtual void SetVelSolutionDVector(unsigned long iPoint) {}
 
   /*!
@@ -2760,5 +2766,10 @@ public:
    * \return value of the source term
    */
   virtual su2double GetSourceTerm_DispAdjoint(unsigned long iPoint, unsigned long iDim) const { return 0.0; }
+
+  /*!
+   * \brief A virtual member.
+   */
+  inline virtual  su2double **GetAijML(unsigned long iPoint) { return nullptr; }
 
 };

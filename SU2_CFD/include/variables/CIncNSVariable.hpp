@@ -43,6 +43,11 @@ private:
 
   VectorType DES_LengthScale;
 
+  /*--- SDD-RANS delta's ---*/
+  MatrixType delta_SDD;                    /*!< \brief delta SDD vector to be read in. Currently only eigenvalue delta's in cartesian 
+				     co-ords ( delta_zeta, delta_eta ). 6D vector to make space for log(k) and eigenvector delta's later.  */
+  CVectorOfMatrix Aij_ML;
+
 public:
   /*!
    * \brief Constructor of the class.
@@ -73,6 +78,18 @@ public:
    * \brief Set the vorticity value.
    */
   bool SetVorticity_StrainMag() override;
+
+  /*!
+   * \brief Set the ML derived anisotropy tensor to convege towards
+   * \param[in] val_Aij_ML - Value of Aij_ML
+   */
+  void SetAijML(unsigned long iPoint, su2double *val_Aij_ML) override;
+
+  /*!
+   * \brief Get the ML derived anisotropy tensor at iPoint
+   * \return val_Aij_ML - Value of Aij_ML
+   */
+  inline su2double **GetAijML(unsigned long iPoint) override  { return Aij_ML[iPoint]; }
 
   /*!
    * \overload
@@ -137,5 +154,15 @@ public:
    * \return Value of the DES length Scale.
    */
   inline su2double GetDES_LengthScale(unsigned long iPoint) const override { return DES_LengthScale(iPoint); }
+
+    /*!
+   * \brief Set the value of the delta_SDD vector for all indices.
+   * \param[in] iPoint - Point index.
+   * \param[in] val_delta - delta_SDD value.
+   * \return Set the value of delta_SDD for all indices.
+   */
+  inline void SetSDD(unsigned long iPoint, const su2double *val_delta) {
+    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_SDD(iPoint,iVar) = val_delta[iVar];
+  }
 
 };

@@ -207,7 +207,7 @@ protected:
   CFluidModel  *FluidModel;   /*!< \brief fluid model used in the solver */
   su2double **Preconditioner; /*!< \brief Auxiliary matrix for storing the low speed preconditioner. */
 
-  su2double *A_ij_ML;
+  su2double *delta_SDD;
 
   /* Sliding meshes variables */
 

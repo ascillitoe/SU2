@@ -55,7 +55,7 @@ CIncNSSolver::CIncNSSolver(void) : CIncEulerSolver() {
   SlidingState      = nullptr;
   SlidingStateNodes = nullptr;
 
-  A_ij_ML = nullptr;
+  delta_SDD = nullptr;
 }
 
 CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short iMesh) : CIncEulerSolver() {
@@ -130,7 +130,7 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   MaxHF_Visc = nullptr; ForceViscous = nullptr; MomentViscous = nullptr;
   CSkinFriction = nullptr; HF_Visc = nullptr;
 
-  A_ij_ML = nullptr; //TODO
+//  delta_DD = nullptr; 
 
   /*--- Set the gamma value ---*/
 
@@ -482,10 +482,11 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   HF_Visc    = new su2double[nMarker];
   MaxHF_Visc = new su2double[nMarker];
 
-  /*--- SDD-RANS arrays ---*/ //TODO
+  /*--- SDD-RANS arrays ---*/
   if (config->GetUsing_SDD()) {
-    A_ij_ML  = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar]   = 0.0;
+    delta_SDD = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) delta_SDD[iVar]   = 0.0;
   }
+  cout << "TEST" << endl;
 
   /*--- Init total coefficients ---*/
 
@@ -693,8 +694,8 @@ CIncNSSolver::~CIncNSSolver(void) {
     delete [] HeatConjugateVar;
   }
 
-  if (A_ij_ML != nullptr) { //TODO
-    delete [] A_ij_ML;
+  if (delta_SDD != nullptr) {
+    delete [] delta_SDD;
   }
 }
 
@@ -815,7 +816,6 @@ unsigned long CIncNSSolver::SetPrimitive_Variables(CSolver **solver_container, C
   for (iPoint = 0; iPoint < nPoint; iPoint++) {
 
     /*--- Retrieve the value of the kinetic energy (if needed) ---*/
-
     if (turb_model != NONE && solver_container[TURB_SOL] != nullptr) {
       eddy_visc = solver_container[TURB_SOL]->GetNodes()->GetmuT(iPoint);
       if (tkeNeeded) turb_ke = solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0);
@@ -1115,7 +1115,7 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                      solver_container[TURB_SOL]->GetNodes()->GetSolution(jPoint,0));
 
-        /*--- Aij tensor from ML ---*/
+        /*--- SDD vector from ML ---*/
 
     if (config->GetUsing_SDD())
       numerics->SetAijML(nodes->GetAijML(iPoint),
@@ -1654,11 +1654,6 @@ void CIncNSSolver::BC_HeatFlux_Wall(CGeometry *geometry, CSolver **solver_contai
             Jacobian_i[iVar][jVar] = 0.0;
         }
       }
-
-      // TODO - Is this actually needed?
-//      if (config->GetUsing_SDD())
-//      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
-//		         nodes->GetAijML(iPoint));
 
       /*--- Store the corrected velocity at the wall which will
        be zero (v = 0), unless there are moving walls (v = u_wall)---*/

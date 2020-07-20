@@ -771,7 +771,7 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
   AD::SetPreaccIn(turb_ke_i); AD::SetPreaccIn(turb_ke_j);
   AD::SetPreaccIn(Normal, nDim);
 
-  unsigned short iVar, jVar, iDim;
+  unsigned short iVar, jVar, iDim, jDim;
 
   /*--- Normalized normal vector ---*/
 
@@ -812,12 +812,18 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
   Mean_Thermal_Conductivity = 0.5*(Thermal_Conductivity_i + Thermal_Conductivity_j);
 
   if (using_sdd){
-    for (iVar = 0; iVar < 6; iVar++) {
-      A_ij_ML[iVar] = 0.5*(A_ij_ML_i[iVar]+A_ij_ML_j[iVar]);
+    for (iDim = 0; iDim < 3; iDim++) {
+      for (jDim = 0; jDim < 3; jDim++) {
+        Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
+      }
     }
-//    cout << A_ij_ML[0] << ' ' << A_ij_ML[1] << ' ' << A_ij_ML[2] << ' ' << A_ij_ML[3] << ' ' << A_ij_ML[4] << ' ' << A_ij_ML[5] << Mean_turb_ke << endl; //TODO - why are a few of these always zero?
-//    if (A_ij_ML[0]==0) exit(1);
+    cout << Aij_ML[0][0] << ' ' << Aij_ML[1][1] << ' ' << Aij_ML[2][2] << ' '<< Mean_turb_ke << endl; //TODO - why are a few of these always zero?
+
   }
+
+//    cout << delta_SDD[0] << ' ' << delta_SDD[1] << ' ' << Mean_turb_ke << endl; //TODO - why are a few of these always zero?
+////    if (delta_SDD[0]==0) exit(1);
+//  }
 
   /*--- Mean gradient approximation ---*/
 

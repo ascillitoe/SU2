@@ -83,8 +83,6 @@ CIncEulerSolver::CIncEulerSolver(void) : CSolver() {
   SlidingState     = nullptr;
   SlidingStateNodes = nullptr;
 
-  //A_ij_ML = nullptr;
-
   nodes = nullptr;
 }
 
@@ -192,8 +190,6 @@ CIncEulerSolver::CIncEulerSolver(CGeometry *geometry, CConfig *config, unsigned 
 
   FluidModel = nullptr;
 
-  //A_ij_ML = nullptr;
-
   /*--- Set the gamma value ---*/
 
   Gamma = config->GetGamma();
@@ -270,12 +266,6 @@ CIncEulerSolver::CIncEulerSolver(CGeometry *geometry, CConfig *config, unsigned 
   Primitive   = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive[iVar]   = 0.0;
   Primitive_i = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive_i[iVar] = 0.0;
   Primitive_j = new su2double[nPrimVar]; for (iVar = 0; iVar < nPrimVar; iVar++) Primitive_j[iVar] = 0.0;
-
-    /*--- SDD variables ---*/
-
-//  if (config->GetUsing_SDD()) {
-//    A_ij_ML = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar]   = 0.0;
-//  }
 
   /*--- Define some auxiliary vectors related to the undivided lapalacian ---*/
 
@@ -779,10 +769,6 @@ CIncEulerSolver::~CIncEulerSolver(void) {
   }
 
   delete FluidModel;
-
-//  if (A_ij_ML != nullptr) {
-//    delete [] A_ij_ML;
-//  }
 
   delete nodes;
 }
@@ -1383,6 +1369,7 @@ void CIncEulerSolver::SetInitialCondition(CGeometry **geometry, CSolver ***solve
                     (config->GetKind_Solver() == DISC_ADJ_INC_RANS));
   bool dual_time = ((config->GetTime_Marching() == DT_STEPPING_1ST) ||
                     (config->GetTime_Marching() == DT_STEPPING_2ND));
+  bool using_sdd = (config->GetUsing_SDD());
 
   /*--- Check if a verification solution is to be computed. ---*/
   if ((VerificationSolution) && (TimeIter == 0) && !restart) {
@@ -1493,6 +1480,17 @@ void CIncEulerSolver::SetInitialCondition(CGeometry **geometry, CSolver ***solve
         if (rans) {
           solver_container[iMesh][TURB_SOL]->GetNodes()->Set_Solution_time_n();
         }
+      }
+    }
+  }
+
+  /*--- Initialise sdd-rans A_ij tensor if needed ---*/
+  if (using_sdd) {
+    /*--- Loop over the multigrid levels. ---*/ //TODO - currently only working for single grid 
+    for (iMesh = 0; iMesh <= config->GetnMGLevels(); iMesh++) {
+      /*--- Loop over all grid points. ---*/
+      for (iPoint = 0; iPoint < geometry[iMesh]->GetnPoint(); iPoint++) {
+	nodes->SetAijML(iPoint,solver_container[iMesh][FLOW_SOL]->GetNodes()->GetSDD(iPoint));
       }
     }
   }
@@ -4354,12 +4352,6 @@ void CIncEulerSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container,
         conv_numerics->SetGridVel(geometry->nodes->GetGridVel(iPoint),
                                   geometry->nodes->GetGridVel(iPoint));
 
-      /*--- Aij tensor from ML ---*/ //TODO - is this needed
-
-//      if (config->GetUsing_SDD())
-//      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
-//		         nodes->GetAijML(iPoint));
-
       /*--- Compute the residual using an upwind scheme ---*/
 
       auto residual = conv_numerics->ComputeResidual(config);
@@ -4567,11 +4559,6 @@ void CIncEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
       if (dynamic_grid)
         conv_numerics->SetGridVel(geometry->nodes->GetGridVel(iPoint),
                                   geometry->nodes->GetGridVel(iPoint));
-
-      /*--- Aij tensor from ML ---*/ //TODO - is this needed
-      if (config->GetUsing_SDD())
-      conv_numerics->SetAijML(nodes->GetAijML(iPoint),
-		         nodes->GetAijML(iPoint));
 
       /*--- Compute the residual using an upwind scheme ---*/
 
@@ -5903,12 +5890,12 @@ void CIncEulerSolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConf
       nodes->SetSolution(iPoint_Local,Solution);
       iPoint_Global_Local++;
 
-      /*--- Load the anisotropy tensor if using sdd-rans.
-       TODO - Assuming A_ij after primitives and turbulence var's, probs need to fix this to work with dynamic_grid. ---*/
+      /*--- Load vector of delta's if using sdd-rans.
+       TODO - Assuming delta_SDD stored after primitives and turbulence var's, probs need to fix this to work with dynamic_grid. ---*/
       if (config->GetUsing_SDD()) {
         index = counter*Restart_Vars[1] + skipVars + nVar_Restart + turbVars;
-        for (iVar = 0; iVar < 6; iVar++) A_ij_ML[iVar] = Restart_Data[index+iVar];
-        nodes->SetAijML(iPoint_Local,A_ij_ML);
+        for (iVar = 0; iVar < 6; iVar++) delta_SDD[iVar] = Restart_Data[index+iVar];
+        nodes->SetSDD(iPoint_Local,delta_SDD);
       }
 
       /*--- For dynamic meshes, read in and store the
