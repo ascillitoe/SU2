@@ -271,12 +271,16 @@ void CTurbSSTSolver::Preprocessing(CGeometry *geometry, CSolver **solver_contain
 
   if (limiter_turb) SetSolution_Limiter(geometry, config);
 
+  cout << "TurbSSTSolver::Preprocessing" << endl;
+
 }
 
 void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_container,
                                     CConfig *config, unsigned short iMesh) {
 
   const su2double a1 = constants[7];
+
+  const bool first_iter = (config->GetInnerIter() == 0);
 
   /*--- Compute turbulence gradients. ---*/
 
@@ -315,6 +319,12 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
 
     nodes->SetmuT(iPoint,muT);
 
+    if(first_iter){
+      cout << "Entering InitAijML" << endl;
+      su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
+      su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
+      nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd);
+    }
   }
 
 }

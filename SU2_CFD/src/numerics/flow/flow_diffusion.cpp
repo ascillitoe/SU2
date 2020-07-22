@@ -817,13 +817,9 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
       }
     }
-    cout << Aij_ML[0][0] << ' ' << Aij_ML[1][1] << ' ' << Aij_ML[2][2] << ' '<< Mean_turb_ke << endl; //TODO - why are a few of these always zero?
 
+  cout << Aij_ML[0][0] << ' ' << Aij_ML[1][1] << ' ' << Aij_ML[2][2] << ' '<< Mean_turb_ke << endl; //TODO - why are a few of these always zero?
   }
-
-//    cout << delta_SDD[0] << ' ' << delta_SDD[1] << ' ' << Mean_turb_ke << endl; //TODO - why are a few of these always zero?
-////    if (delta_SDD[0]==0) exit(1);
-//  }
 
   /*--- Mean gradient approximation ---*/
 

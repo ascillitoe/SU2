@@ -46,7 +46,11 @@ private:
   /*--- SDD-RANS delta's ---*/
   MatrixType delta_SDD;                    /*!< \brief delta SDD vector to be read in. Currently only eigenvalue delta's in cartesian 
 				     co-ords ( delta_zeta, delta_eta ). 6D vector to make space for log(k) and eigenvector delta's later.  */
-  CVectorOfMatrix Aij_ML;
+  /*!
+   * \brief Get the mean rate of strain matrix based on velocity gradients
+   * \param[in] S_ij
+   */
+  void GetMeanRateOfStrainMatrix(su2double **Grad_Vel, su2double **s_ij) const;
 
 public:
   /*!
@@ -81,15 +85,9 @@ public:
 
   /*!
    * \brief Set the ML derived anisotropy tensor to convege towards
-   * \param[in] val_Aij_ML - Value of Aij_ML
+   * \param[in] val_delta_sdd - Value of Aij_ML
    */
-  void SetAijML(unsigned long iPoint, su2double *val_Aij_ML) override;
-
-  /*!
-   * \brief Get the ML derived anisotropy tensor at iPoint
-   * \return val_Aij_ML - Value of Aij_ML
-   */
-  inline su2double **GetAijML(unsigned long iPoint) override  { return Aij_ML[iPoint]; }
+//  void SetAijML(unsigned long iPoint, su2double *val_delta_sdd, su2double *flow_solution, su2double *turb_solution) override;
 
   /*!
    * \overload

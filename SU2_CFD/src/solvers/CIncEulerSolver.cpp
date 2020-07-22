@@ -1484,16 +1484,18 @@ void CIncEulerSolver::SetInitialCondition(CGeometry **geometry, CSolver ***solve
     }
   }
 
-  /*--- Initialise sdd-rans A_ij tensor if needed ---*/
-  if (using_sdd) {
-    /*--- Loop over the multigrid levels. ---*/ //TODO - currently only working for single grid 
-    for (iMesh = 0; iMesh <= config->GetnMGLevels(); iMesh++) {
-      /*--- Loop over all grid points. ---*/
-      for (iPoint = 0; iPoint < geometry[iMesh]->GetnPoint(); iPoint++) {
-	nodes->SetAijML(iPoint,solver_container[iMesh][FLOW_SOL]->GetNodes()->GetSDD(iPoint));
-      }
-    }
-  }
+//  /*--- Initialise sdd-rans A_ij tensor if needed ---*/
+//  if (using_sdd) {
+//    /*--- Loop over the multigrid levels. ---*/ //TODO - currently only working for single grid 
+//    for (iMesh = 0; iMesh <= config->GetnMGLevels(); iMesh++) {
+//      /*--- Loop over all grid points. ---*/
+//      for (iPoint = 0; iPoint < geometry[iMesh]->GetnPoint(); iPoint++) {
+//	nodes->SetAijML(iPoint,solver_container[iMesh][FLOW_SOL]->GetNodes()->GetSDD(iPoint),
+//			solver_container[iMesh][FLOW_SOL]->GetNodes()->GetSolution(iPoint),
+//			solver_container[iMesh][TURB_SOL]->GetNodes()->GetSolution(iPoint));
+//      }
+//    }
+//  }
 }
 
 void CIncEulerSolver::Preprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, unsigned short iMesh, unsigned short iRKStep, unsigned short RunTime_EqSystem, bool Output) {

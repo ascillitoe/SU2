@@ -1892,7 +1892,8 @@ public:
   /*!
    * \brief A virtual member.
    */
-  inline virtual void SetAijML(unsigned long iPoint, su2double *val_delta_ssd) { }
+//  inline virtual void SetAijML(unsigned long iPoint, su2double *val_delta_ssd, su2double *flow_solution, su2double *turb_solution) { }
+
 
   /*!
    * \brief A virtual member.
@@ -1984,6 +1985,8 @@ public:
    * \param[in] val_dist - Value of the distance to the wall.
    */
   inline virtual void SetBlendingFunc(unsigned long iPoint, su2double val_viscosity, su2double val_dist, su2double val_density) {}
+
+  inline virtual void InitAijML(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd) {}
 
   /*!
    * \brief Get the first blending function of the SST model.

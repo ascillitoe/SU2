@@ -486,7 +486,6 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   if (config->GetUsing_SDD()) {
     delta_SDD = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) delta_SDD[iVar]   = 0.0;
   }
-  cout << "TEST" << endl;
 
   /*--- Init total coefficients ---*/
 
@@ -778,6 +777,18 @@ void CIncNSSolver::Preprocessing(CGeometry *geometry, CSolver **solver_container
     Omega_Max = max(Omega_Max, Omega);
 
   }
+
+  /*--- If first interation, do a single node loop to initialise AijML ---*/
+//  if (InnerIter==0){
+////    for (iPoint = 0; iPoint < nPoint; iPoint++) {
+////
+////    su2double turb_solution = solver_container[FLOW_SOL]->GetNodes()->GetSolution(0,0);
+////    cout << turb_solution << endl;
+////    exit(1);
+////    nodes->InitAijML();
+//    exit(1);
+////    }
+//  }
 
   /*--- Initialize the Jacobian matrices ---*/
 
@@ -1089,6 +1100,8 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
 
   bool implicit = (config->GetKind_TimeIntScheme() == EULER_IMPLICIT);
 
+  cout << "CIncNSSolver::Viscous_Residual" << endl;
+  exit(1);
   for (iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
 
     /*--- Points, coordinates and normal vector in edge ---*/
@@ -1115,11 +1128,8 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                      solver_container[TURB_SOL]->GetNodes()->GetSolution(jPoint,0));
 
-        /*--- SDD vector from ML ---*/
-
-    if (config->GetUsing_SDD())
-      numerics->SetAijML(nodes->GetAijML(iPoint),
-		         nodes->GetAijML(jPoint));
+    numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
+                       solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
 
     /*--- Compute and update residual ---*/
 
