@@ -343,6 +343,10 @@ private:
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij);
 
+  void SetBlendedAij(const CConfig* config);
+
+  void SetRijfromAij();
+
 public:
   /*!
    * \brief Constructor of the class.

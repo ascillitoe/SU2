@@ -1892,12 +1892,6 @@ public:
   /*!
    * \brief A virtual member.
    */
-//  inline virtual void SetAijML(unsigned long iPoint, su2double *val_delta_ssd, su2double *flow_solution, su2double *turb_solution) { }
-
-
-  /*!
-   * \brief A virtual member.
-   */
   inline virtual void SetVelSolutionDVector(unsigned long iPoint) {}
 
   /*!

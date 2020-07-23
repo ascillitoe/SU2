@@ -84,12 +84,6 @@ public:
   bool SetVorticity_StrainMag() override;
 
   /*!
-   * \brief Set the ML derived anisotropy tensor to convege towards
-   * \param[in] val_delta_sdd - Value of Aij_ML
-   */
-//  void SetAijML(unsigned long iPoint, su2double *val_delta_sdd, su2double *flow_solution, su2double *turb_solution) override;
-
-  /*!
    * \overload
    * \param[in] eddy_visc - Value of the eddy viscosity.
    */

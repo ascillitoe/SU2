@@ -196,6 +196,13 @@ protected:
    */
   void GetMeanRateOfStrainMatrix(su2double **S_ij) const;
 
+  /*!
+   * TODO - describe
+   */
+  void SetBlendedAij(const CConfig* config);
+
+  void SetRijfromAij();
+
 public:
 
   /*!

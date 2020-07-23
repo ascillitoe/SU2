@@ -1099,9 +1099,8 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
   unsigned long iPoint, jPoint, iEdge;
 
   bool implicit = (config->GetKind_TimeIntScheme() == EULER_IMPLICIT);
+  bool using_sdd = (config->GetUsing_SDD());
 
-  cout << "CIncNSSolver::Viscous_Residual" << endl;
-  exit(1);
   for (iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
 
     /*--- Points, coordinates and normal vector in edge ---*/
@@ -1128,8 +1127,12 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                      solver_container[TURB_SOL]->GetNodes()->GetSolution(jPoint,0));
 
-    numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
-                       solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
+    /*--- Set Aij_ML if SDD-RANS ---*/
+
+    if (using_sdd){
+      numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
+                         solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
+    }
 
     /*--- Compute and update residual ---*/
 

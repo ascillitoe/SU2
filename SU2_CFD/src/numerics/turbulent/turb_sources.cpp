@@ -835,9 +835,15 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
 
    /* if using UQ methodolgy, calculate production using perturbed Reynolds stress matrix */
 
-   if (using_uq){
-     SetReynoldsStressMatrix(TurbVar_i[0]);
-     SetPerturbedRSM(TurbVar_i[0], config);
+   if (using_uq || using_sdd){
+     if (using_uq) {
+       SetReynoldsStressMatrix(TurbVar_i[0]);
+       SetPerturbedRSM(TurbVar_i[0], config);
+     }
+     else {
+       SetBlendedAij(config);
+       SetRijfromAij();
+     }
      SetPerturbedStrainMag(TurbVar_i[0]);
      pk = Eddy_Viscosity_i*PerturbedStrainMag*PerturbedStrainMag
           - 2.0/3.0*Density_i*TurbVar_i[0]*diverg;
@@ -854,7 +860,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
 
    /* if using UQ methodolgy, calculate production using perturbed Reynolds stress matrix */
 
-   if (using_uq){
+   if (using_uq || using_sdd){
      pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
    }
    else {
@@ -1106,4 +1112,90 @@ void CSourcePieceWise_TurbSST::SetPerturbedStrainMag(su2double turb_ke){
   }
 
   delete [] StrainRate;
+}
+
+void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
+
+  unsigned short iDim, jDim;
+  su2double **S_ij   = new su2double* [3];
+  su2double **Aij_BL = new su2double* [3];
+  su2double **delta3 = new su2double* [3];
+  for (iDim = 0; iDim < 3; iDim++){
+    S_ij[iDim]         = new su2double [3];
+    Aij_BL[iDim]       = new su2double [3];
+    delta3[iDim]       = new su2double [3] ();
+    delta3[iDim][iDim] = 1.0;
+  }
+  su2double gamma_max = config->GetSDD_GammaMax();
+  su2double n_max     = config->GetSDD_NMax();
+  unsigned long iter  = config->GetInnerIter();
+  su2double rho       = Density_i;
+  su2double muT       = Eddy_Viscosity_i;
+  su2double turb_ke   = TurbVar_i[0];
+  su2double divVel = 0;
+
+ /* --- Calculate rate of strain tensor --- */
+  for (iDim = 0; iDim < 3; iDim++){
+    divVel += PrimVar_Grad_i[iDim+1][iDim];
+  }
+
+  for (iDim = 0; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      S_ij[iDim][jDim] = 0.5*(PrimVar_Grad_i[iDim+1][jDim] + PrimVar_Grad_i[jDim+1][iDim]) - divVel*delta3[iDim][jDim]/3.0;
+    }
+  }
+
+  /*--- Compute baseline turbulent anisotropy tensor ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      Aij_BL[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
+    }
+  }
+
+  /*--- Compute SDD-RANS blending parameter gamma ---*/
+  su2double gamma = gamma_max*min(1.0,iter/n_max);
+  //cout << iter << ", " << gamma << endl;
+
+  /*--- BLend Aij_BL and Aij_ML together ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML_i[iDim][jDim];
+      cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", ML = " << Aij_ML_i[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
+    }
+  }
+
+/* --- Deallocate memory --- */
+    for (iDim = 0; iDim < 3; iDim++){
+      delete [] S_ij[iDim];
+      delete [] Aij_BL[iDim];
+      delete [] delta3[iDim];
+    }
+    delete [] S_ij;
+    delete [] Aij_BL;
+    delete [] delta3;
+}
+
+void CSourcePieceWise_TurbSST::SetRijfromAij()  {
+
+  unsigned short iDim, jDim;
+  su2double **delta3 = new su2double* [3];
+  for (iDim = 0; iDim < 3; iDim++){
+    delta3[iDim]       = new su2double [3] ();
+    delta3[iDim][iDim] = 1.0;
+  }
+  su2double turb_ke   = TurbVar_i[0];
+
+  /*--- Set Reynolds stress tensor from new Aij tensor ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      MeanPerturbedRSM[iDim][jDim] = 2.0 * TurbVar_i[0] * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
+      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
+    }
+  }
+
+/* --- Deallocate memory --- */
+  for (iDim = 0; iDim < 3; iDim++){
+    delete [] delta3[iDim];
+  }
+  delete [] delta3;
 }

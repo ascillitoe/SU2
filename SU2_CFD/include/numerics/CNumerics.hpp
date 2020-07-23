@@ -226,6 +226,7 @@ protected:
 
   /* Supporting data structures for sdd-rans methodology */
   su2double **Aij_ML, **Aij_ML_i, **Aij_ML_j;
+  su2double **Aij_new;
 
 public:
   /*!

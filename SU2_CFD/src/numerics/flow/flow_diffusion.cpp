@@ -133,7 +133,7 @@ void CAvgGrad_Base::SetStressTensor(const su2double *val_primvar,
 
   /* --- If UQ methodology is used, calculate tau using the perturbed reynolds stress tensor --- */
 
-  if (using_uq){
+  if (using_uq || using_sdd){
     for (iDim = 0 ; iDim < nDim; iDim++)
       for (jDim = 0 ; jDim < nDim; jDim++)
         tau[iDim][jDim] = val_laminar_viscosity*( val_gradprimvar[jDim+1][iDim] + val_gradprimvar[iDim+1][jDim] )
@@ -811,16 +811,6 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
   Mean_turb_ke              = 0.5*(turb_ke_i + turb_ke_j);
   Mean_Thermal_Conductivity = 0.5*(Thermal_Conductivity_i + Thermal_Conductivity_j);
 
-  if (using_sdd){
-    for (iDim = 0; iDim < 3; iDim++) {
-      for (jDim = 0; jDim < 3; jDim++) {
-        Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
-      }
-    }
-
-  cout << Aij_ML[0][0] << ' ' << Aij_ML[1][1] << ' ' << Aij_ML[2][2] << ' '<< Mean_turb_ke << endl; //TODO - why are a few of these always zero?
-  }
-
   /*--- Mean gradient approximation ---*/
 
   for (iVar = 0; iVar < nVar; iVar++)
@@ -832,6 +822,18 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
   if (correct_gradient && dist_ij_2 != 0.0) {
     CorrectGradient(Mean_GradPrimVar, PrimVar_i, PrimVar_j, Edge_Vector,
                     dist_ij_2, nVar);
+  }
+
+  /*--- Set turbulent Reynolds stress tensor if SDD-RANS ---*/
+
+  if (using_sdd){
+    for (iDim = 0; iDim < 3; iDim++) {
+      for (jDim = 0; jDim < 3; jDim++) {
+        Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
+      }
+    }
+  SetBlendedAij(config);
+  SetRijfromAij();
   }
 
   /*--- Get projected flux tensor (viscous residual) ---*/
@@ -1083,7 +1085,7 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
   AD::SetPreaccIn(turb_ke_i); AD::SetPreaccIn(turb_ke_j);
   AD::SetPreaccIn(Normal, nDim);
 
-  unsigned short iVar, jVar, iDim;
+  unsigned short iVar, jVar, iDim, jDim;
 
   /*--- Normalized normal vector ---*/
 
@@ -1155,6 +1157,18 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
     SetPerturbedRSM(Mean_turb_ke, config);
   }
 
+  /*--- Set turbulent Reynolds stress tensor if SDD-RANS ---*/
+
+  if (using_sdd){
+    for (iDim = 0; iDim < 3; iDim++) {
+      for (jDim = 0; jDim < 3; jDim++) {
+        Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
+      }
+    }
+  SetBlendedAij(config);
+  SetRijfromAij();
+  }
+
   /*--- Get projected flux tensor (viscous residual) ---*/
 
   SetStressTensor(Mean_PrimVar, Mean_GradPrimVar, Mean_turb_ke,
@@ -1194,4 +1208,90 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
 
   return ResidualType<>(Proj_Flux_Tensor, Jacobian_i, Jacobian_j);
 
+}
+
+void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
+
+  unsigned short iDim, jDim;
+  su2double **S_ij   = new su2double* [3];
+  su2double **Aij_BL = new su2double* [3];
+  su2double **delta3 = new su2double* [3];
+  for (iDim = 0; iDim < 3; iDim++){
+    S_ij[iDim]         = new su2double [3];
+    Aij_BL[iDim]       = new su2double [3];
+    delta3[iDim]       = new su2double [3] ();
+    delta3[iDim][iDim] = 1.0;
+  }
+  su2double gamma_max = config->GetSDD_GammaMax();
+  su2double n_max     = config->GetSDD_NMax();
+  unsigned long iter  = config->GetInnerIter();
+  su2double rho       = Mean_PrimVar[nDim+2];
+  su2double muT       = Mean_Eddy_Viscosity;
+  su2double turb_ke   = Mean_turb_ke; 
+  su2double divVel = 0;
+
+ /* --- Calculate rate of strain tensor --- */
+  for (iDim = 0; iDim < 3; iDim++){
+    divVel += Mean_GradPrimVar[iDim+1][iDim];
+  }
+
+  for (iDim = 0; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      S_ij[iDim][jDim] = 0.5*(Mean_GradPrimVar[iDim+1][jDim] + Mean_GradPrimVar[jDim+1][iDim]) - divVel*delta3[iDim][jDim]/3.0;
+    }
+  }
+
+  /*--- Compute baseline turbulent anisotropy tensor ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      Aij_BL[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
+    }
+  }
+
+  /*--- Compute SDD-RANS blending parameter gamma ---*/
+  su2double gamma = gamma_max*min(1.0,iter/n_max);
+  //cout << iter << ", " << gamma << endl;
+
+  /*--- BLend Aij_BL and Aij_ML together ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
+      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", ML = " << Aij_ML[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
+    }
+  }
+
+  /* --- Deallocate memory --- */
+    for (iDim = 0; iDim < 3; iDim++){
+      delete [] S_ij[iDim];
+      delete [] Aij_BL[iDim];
+      delete [] delta3[iDim];
+    }
+    delete [] S_ij;
+    delete [] Aij_BL;
+    delete [] delta3;
+}
+
+void CAvgGrad_Base::SetRijfromAij()  {
+
+  unsigned short iDim, jDim;
+  su2double **delta3 = new su2double* [3];
+  for (iDim = 0; iDim < 3; iDim++){
+    delta3[iDim]       = new su2double [3] ();
+    delta3[iDim][iDim] = 1.0;
+  }
+  su2double turb_ke   = Mean_turb_ke; 
+
+  /*--- Set Reynolds stress tensor from new Aij tensor ---*/
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
+      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
+    }
+  }
+
+/* --- Deallocate memory --- */
+  for (iDim = 0; iDim < 3; iDim++){
+    delete [] delta3[iDim];
+  }
+  delete [] delta3;
 }

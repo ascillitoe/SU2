@@ -2772,6 +2772,12 @@ void CConfig::SetConfig_Options() {
   /* DESCRIPTION: Using stochastic data-driven RANS Turbulence model */
   addBoolOption("USING_SDD", using_sdd, false);
 
+  /* DESCRIPTION: Maximum value of blending parameter gamma to use for SDD */
+  addDoubleOption("SDD_GAMMA_MAX", sdd_gamma_max, 1.0);
+
+  /* DESCRIPTION: Number of iterations after which gamma is fixed to gamma_max */
+  addUnsignedLongOption("SDD_N_MAX", sdd_n_max, 1000);
+
   /* DESCRIPTION: Number of calls to 'Build' that trigger re-factorization (0 means only once). */
   addUnsignedLongOption("PASTIX_FACTORIZATION_FREQUENCY", pastix_fact_freq, 1);
 

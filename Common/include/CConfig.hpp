@@ -1131,6 +1131,8 @@ private:
 
   bool using_sdd;               /*!< \brief Using SDD-RANS i.e. reading in aij_ML and blending this in */
   bool write_sdd;               /*!< \brief Writing out aij_BL to give to ML */
+  su2double sdd_gamma_max;      /*!< \brief Maximum value of blending parameter gamma for SDD-RANS */
+  unsigned long sdd_n_max;      /*!< \brief Number of iterations at which gamma reaches gamma_max */
 
   unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
   unsigned short pastix_verb_lvl;  /*!< \brief Verbosity level for PaStiX */
@@ -8870,6 +8872,18 @@ public:
    * \return <code>TRUE</code> means that SDD-RANS will be used
    */
   bool GetUsing_SDD(void) const { return using_sdd; }
+
+   /*!
+   * \brief Get gamma_max value for SDD-RANS
+   * \return value of gamma_max for SDD-RANS
+   */
+  su2double GetSDD_GammaMax(void) const { return sdd_gamma_max; }
+
+   /*!
+   * \brief Get n_max value for SDD-RANS
+   * \return value of n_max for SDD-RANS
+   */
+  unsigned long GetSDD_NMax(void) const { return sdd_n_max; }
 
   /*!
    * \brief Get information about whether to use write out aij for ML training (as part of SDD-RANS)

@@ -271,8 +271,6 @@ void CTurbSSTSolver::Preprocessing(CGeometry *geometry, CSolver **solver_contain
 
   if (limiter_turb) SetSolution_Limiter(geometry, config);
 
-  cout << "TurbSSTSolver::Preprocessing" << endl;
-
 }
 
 void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_container,
@@ -320,7 +318,6 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
     nodes->SetmuT(iPoint,muT);
 
     if(first_iter){
-      cout << "Entering InitAijML" << endl;
       su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
       su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
       nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd);
@@ -336,6 +333,8 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
   /*--- Pick one numerics object per thread. ---*/
   CNumerics* numerics = numerics_container[SOURCE_FIRST_TERM + omp_get_thread_num()*MAX_TERMS];
+
+  bool using_sdd = (config->GetUsing_SDD());
 
   /*--- Loop over all points. ---*/
 
@@ -381,6 +380,12 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     numerics->SetCrossDiff(nodes->GetCrossDiff(iPoint),0.0);
 
+     /*--- Set Aij_ML if SDD-RANS ---*/
+
+    if (using_sdd){
+      numerics->SetAijML(nodes->GetAijML(iPoint),nullptr);
+    }
+   
     /*--- Compute the source term ---*/
 
     auto residual = numerics->ComputeResidual(config);

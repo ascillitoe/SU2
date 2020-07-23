@@ -94,53 +94,43 @@ void CTurbSSTVariable::SetBlendingFunc(unsigned long iPoint, su2double val_visco
 void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd) {
 
   unsigned short iDim, jDim;
-  su2double **S_ij               = new su2double* [3];
-  su2double **A_ij               = new su2double* [3];
-  su2double **newA_ij            = new su2double* [3];
-  su2double **MeanReynoldsStress = new su2double* [3];
-  su2double **delta3             = new su2double* [3];
-  su2double **Eig_Vec            = new su2double* [3];
-  su2double **Corners            = new su2double* [3];
-  su2double *Eig_Val             = new su2double  [3];
-  su2double *Bary_Coord          = new su2double  [2];
-  su2double *New_Bary_Coord      = new su2double  [2];
+  su2double **S_ij          = new su2double* [3];
+  su2double **A_ij          = new su2double* [3];
+  su2double **newA_ij       = new su2double* [3];
+  su2double **delta3        = new su2double* [3];
+  su2double **Eig_Vec       = new su2double* [3];
+  su2double **Corners       = new su2double* [3];
+  su2double *Eig_Val        = new su2double  [3];
+  su2double *Bary_Coord     = new su2double  [2];
+  su2double *New_Bary_Coord = new su2double  [2];
   for (iDim = 0; iDim < 3; iDim++){
-    A_ij[iDim]               = new su2double [3];
-    newA_ij[iDim]            = new su2double [3];
-    S_ij[iDim]               = new su2double [3];
-    MeanReynoldsStress[iDim] = new su2double [3];
-    delta3[iDim]             = new su2double [3] ();
-    delta3[iDim][iDim]       = 1.0;
-    Eig_Vec[iDim]            = new su2double [3];
-    Eig_Val[iDim]            = 0.0;
-    Corners[iDim]            = new su2double [2];
+    A_ij[iDim]         = new su2double [3];
+    newA_ij[iDim]      = new su2double [3];
+    S_ij[iDim]         = new su2double [3];
+    delta3[iDim]       = new su2double [3] ();
+    delta3[iDim][iDim] = 1.0;
+    Eig_Vec[iDim]      = new su2double [3];
+    Eig_Val[iDim]      = 0.0;
+    Corners[iDim]      = new su2double [2];
   }
   su2double divVel = 0;
-  su2double TWO3 = 2.0/3.0;
 
-  /* --- Calculate rate of strain tensor --- */
+ /* --- Calculate rate of strain tensor --- */
+  for (iDim = 0; iDim < 3; iDim++){
+    divVel += PrimGrad[iDim+1][iDim];
+  }
+
   for (iDim = 0; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-      S_ij[iDim][jDim] = 0.5*(PrimGrad[iDim+1][jDim] + PrimGrad[jDim+1][iDim]);
-    }
-  }
-
-  /* --- Using rate of strain tensor, calculate Reynolds stress tensor --- */
-  for (iDim = 0; iDim < 3; iDim++){
-    divVel += S_ij[iDim][iDim];
-  }
-
-  for (iDim = 0; iDim < 3; iDim++){
-    for (jDim = 0; jDim < 3; jDim++){
-      MeanReynoldsStress[iDim][jDim] = TWO3 * turb_ke * delta3[iDim][jDim]
-      - muT / rho * (2 * S_ij[iDim][jDim] - TWO3 * divVel * delta3[iDim][jDim]);
+      S_ij[iDim][jDim] = 0.5*(PrimGrad[iDim+1][jDim] + PrimGrad[jDim+1][iDim]) - divVel*delta3[iDim][jDim]/3.0;
     }
   }
 
   /* --- Calculate anisotropic part of Reynolds Stress tensor --- */
   for (iDim = 0; iDim< 3; iDim++){
     for (jDim = 0; jDim < 3; jDim++){
-      A_ij[iDim][jDim] = .5 * MeanReynoldsStress[iDim][jDim] / turb_ke - delta3[iDim][jDim] / 3.0;
+      A_ij[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
+//      cout << iDim << jDim << A_ij[iDim][jDim] << endl;
     }
   }
 
@@ -197,7 +187,6 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
       delete [] S_ij[iDim];
       delete [] A_ij[iDim];
       delete [] newA_ij[iDim];
-      delete [] MeanReynoldsStress[iDim];
       delete [] delta3[iDim];
       delete [] Eig_Vec[iDim];
       delete [] Corners[iDim];
@@ -205,7 +194,6 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
     delete [] S_ij;
     delete [] A_ij;
     delete [] newA_ij;
-    delete [] MeanReynoldsStress;
     delete [] delta3;
     delete [] Eig_Vec;
     delete [] Corners;
@@ -217,7 +205,7 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
 
 void CTurbSSTVariable::EigenDecomposition(su2double **A_ij, su2double **Eig_Vec, su2double *Eig_Val, unsigned short n){
   int iDim,jDim;
-  su2double *e = new su2double [3];
+  su2double *e = new su2double [n];
   for (iDim= 0; iDim< n; iDim++){
     e[iDim] = 0;
     for (jDim = 0; jDim < n; jDim++){
