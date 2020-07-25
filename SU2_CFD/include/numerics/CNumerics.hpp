@@ -226,7 +226,6 @@ protected:
 
   /* Supporting data structures for sdd-rans methodology */
   su2double **Aij_ML, **Aij_ML_i, **Aij_ML_j;
-  su2double **Aij_BL, **Aij_BL_i, **Aij_BL_j;
   su2double **Aij_new;
 
 public:
@@ -556,23 +555,13 @@ public:
   }
 
    /*!
-   * \brief Set the ML derived turbulent anisotropy. // TODO - could add SetAijBL here if neccessary?
+   * \brief Set the ML derived turbulent anisotropy. 
    * \param[in] val_Aij_ML_i - Value of Aij_ML at point i.
    * \param[in] val_Aij_ML_j - Value of Aij_ML at point j.
    */
   inline void SetAijML(su2double **val_Aij_ML_i, su2double **val_Aij_ML_j) {
     Aij_ML_i = val_Aij_ML_i;
     Aij_ML_j = val_Aij_ML_j;
-  }
-
-   /*!
-   * \brief Set the baseline turbulent anisotropy. // TODO - could add SetAijBL here if neccessary?
-   * \param[in] val_Aij_BL_i - Value of Aij_BL at point i.
-   * \param[in] val_Aij_BL_j - Value of Aij_BL at point j.
-   */
-  inline void SetAijBL(su2double **val_Aij_BL_i, su2double **val_Aij_BL_j) {
-    Aij_BL_i = val_Aij_BL_i;
-    Aij_BL_j = val_Aij_BL_j;
   }
 
   /*!

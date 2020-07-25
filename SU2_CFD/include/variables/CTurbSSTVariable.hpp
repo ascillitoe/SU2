@@ -44,7 +44,6 @@ protected:
   VectorType F2;    /*!< \brief Menter blending function for blending of k-w and k-eps. */
   VectorType CDkw;  /*!< \brief Cross-diffusion. */
   CVectorOfMatrix Aij_ML;
-  CVectorOfMatrix Aij_BL;
 
 public:
   /*!
@@ -96,12 +95,6 @@ public:
    * \return val_Aij_ML - Value of Aij_ML
    */
   inline su2double **GetAijML(unsigned long iPoint) override  { return Aij_ML[iPoint]; }
-
-  /*!
-   * \brief Get the baseline anisotropy tensor at iPoint
-   * \return val_Aij_BL - Value of Aij_BL
-   */
-  inline su2double **GetAijBL(unsigned long iPoint) override  { return Aij_BL[iPoint]; }
 
   /*!
    * \brief Decomposes the symmetric matrix A_ij, into eigenvectors and eigenvalues

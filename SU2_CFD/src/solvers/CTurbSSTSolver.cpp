@@ -385,7 +385,6 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     if (using_sdd){
       numerics->SetAijML(nodes->GetAijML(iPoint),nullptr);
-      numerics->SetAijBL(nodes->GetAijBL(iPoint),nullptr);
     }
    
     /*--- Compute the source term ---*/
