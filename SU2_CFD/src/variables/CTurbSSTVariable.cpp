@@ -51,6 +51,7 @@ CTurbSSTVariable::CTurbSSTVariable(su2double kine, su2double omega, su2double mu
 
   if (config->GetUsing_SDD()) {
     Aij_ML.resize(nPoint,3,3);
+    Aij_BL.resize(nPoint,3,3);
   }  
 
 }
@@ -130,6 +131,7 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
   for (iDim = 0; iDim< 3; iDim++){
     for (jDim = 0; jDim < 3; jDim++){
       A_ij[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
+      Aij_BL(iPoint,iDim,jDim) = A_ij[iDim][jDim];
 //      cout << iDim << jDim << A_ij[iDim][jDim] << endl;
     }
   }
@@ -175,7 +177,7 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
   // TODO - ML derived perturbations to eigenvectors would go here
   EigenRecomposition(newA_ij, Eig_Vec, Eig_Val, 3);
 
-  // Save newAij_ij in field variable AijML
+  // Save newA_ij in field variable AijML and original A_ij in AijBL
   for (iDim = 0; iDim < 3; iDim++){
     for (jDim = 0; jDim < 3; jDim++){
       Aij_ML(iPoint,iDim,jDim) = newA_ij[iDim][jDim];

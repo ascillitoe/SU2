@@ -279,6 +279,7 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
   const su2double a1 = constants[7];
 
   const bool first_iter = (config->GetInnerIter() == 0);
+  bool using_sdd = (config->GetUsing_SDD());
 
   /*--- Compute turbulence gradients. ---*/
 
@@ -317,7 +318,7 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
 
     nodes->SetmuT(iPoint,muT);
 
-    if(first_iter){
+    if(first_iter && using_sdd){
       su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
       su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
       nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd);
@@ -384,6 +385,7 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     if (using_sdd){
       numerics->SetAijML(nodes->GetAijML(iPoint),nullptr);
+      numerics->SetAijBL(nodes->GetAijBL(iPoint),nullptr);
     }
    
     /*--- Compute the source term ---*/

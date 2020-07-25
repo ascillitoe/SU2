@@ -60,6 +60,9 @@ CNumerics::CNumerics(void) {
   Aij_ML = nullptr;
   Aij_ML_i = nullptr;
   Aij_ML_j = nullptr;
+  Aij_BL = nullptr;
+  Aij_BL_i = nullptr;
+  Aij_BL_j = nullptr;
   Aij_new  = nullptr;
 
 }
@@ -159,12 +162,18 @@ CNumerics::CNumerics(unsigned short val_nDim, unsigned short val_nVar,
     Aij_ML           = new su2double* [3];
     Aij_ML_i         = new su2double* [3];
     Aij_ML_j         = new su2double* [3];
+    Aij_BL           = new su2double* [3];
+    Aij_BL_i         = new su2double* [3];
+    Aij_BL_j         = new su2double* [3];
     Aij_new          = new su2double* [3];
     MeanPerturbedRSM = new su2double* [3];
     for (iDim = 0; iDim < 3; iDim++){
       Aij_ML[iDim]           = new su2double [3];
       Aij_ML_i[iDim]         = new su2double [3];
       Aij_ML_j[iDim]         = new su2double [3];
+      Aij_BL[iDim]           = new su2double [3];
+      Aij_BL_i[iDim]         = new su2double [3];
+      Aij_BL_j[iDim]         = new su2double [3];
       Aij_new[iDim]          = new su2double [3];
       MeanPerturbedRSM[iDim] = new su2double [3];
     }
@@ -238,12 +247,18 @@ CNumerics::~CNumerics(void) {
       delete [] Aij_ML[iDim];
       delete [] Aij_ML_i[iDim];
       delete [] Aij_ML_j[iDim];
+      delete [] Aij_BL[iDim];
+      delete [] Aij_BL_i[iDim];
+      delete [] Aij_BL_j[iDim];
       delete [] Aij_new[iDim];
       delete [] MeanPerturbedRSM[iDim];
     }
     delete [] Aij_ML;
     delete [] Aij_ML_i;
     delete [] Aij_ML_j;
+    delete [] Aij_BL;
+    delete [] Aij_BL_i;
+    delete [] Aij_BL_j;
     delete [] Aij_new;
     delete [] MeanPerturbedRSM;
   }

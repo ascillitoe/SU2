@@ -830,6 +830,7 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
     for (iDim = 0; iDim < 3; iDim++) {
       for (jDim = 0; jDim < 3; jDim++) {
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
+        Aij_BL[iDim][jDim] = 0.5*(Aij_BL_i[iDim][jDim]+Aij_BL_j[iDim][jDim]);
       }
     }
   SetBlendedAij(config);
@@ -1163,6 +1164,7 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
     for (iDim = 0; iDim < 3; iDim++) {
       for (jDim = 0; jDim < 3; jDim++) {
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
+        Aij_BL[iDim][jDim] = 0.5*(Aij_BL_i[iDim][jDim]+Aij_BL_j[iDim][jDim]);
       }
     }
   SetBlendedAij(config);
@@ -1213,14 +1215,11 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
 void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
 
   unsigned short iDim, jDim;
-  su2double **S_ij   = new su2double* [3];
-  su2double **Aij_BL = new su2double* [3];
-  su2double **delta3 = new su2double* [3];
+  su2double **S_ij        = new su2double* [3];
+  su2double **Aij_BL_temp = new su2double* [3];
   for (iDim = 0; iDim < 3; iDim++){
-    S_ij[iDim]         = new su2double [3];
-    Aij_BL[iDim]       = new su2double [3];
-    delta3[iDim]       = new su2double [3] ();
-    delta3[iDim][iDim] = 1.0;
+    S_ij[iDim]        = new su2double [3];
+    Aij_BL_temp[iDim] = new su2double [3];
   }
   su2double gamma_max = config->GetSDD_GammaMax();
   su2double n_max     = config->GetSDD_NMax();
@@ -1244,7 +1243,8 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
   /*--- Compute baseline turbulent anisotropy tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-      Aij_BL[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
+      Aij_BL_temp[iDim][jDim] = Aij_BL[iDim][jDim];
+      //Aij_BL_temp[iDim][jDim] = - muT * S_ij[iDim][jDim] / (rho*turb_ke);
     }
   }
 
@@ -1256,29 +1256,22 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
       Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
-      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", ML = " << Aij_ML[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
+ //     cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", ML = " << Aij_ML[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
     }
   }
 
   /* --- Deallocate memory --- */
     for (iDim = 0; iDim < 3; iDim++){
       delete [] S_ij[iDim];
-      delete [] Aij_BL[iDim];
-      delete [] delta3[iDim];
+      delete [] Aij_BL_temp[iDim];
     }
     delete [] S_ij;
-    delete [] Aij_BL;
-    delete [] delta3;
+    delete [] Aij_BL_temp;
 }
 
 void CAvgGrad_Base::SetRijfromAij()  {
 
   unsigned short iDim, jDim;
-  su2double **delta3 = new su2double* [3];
-  for (iDim = 0; iDim < 3; iDim++){
-    delta3[iDim]       = new su2double [3] ();
-    delta3[iDim][iDim] = 1.0;
-  }
   su2double turb_ke   = Mean_turb_ke; 
 
   /*--- Set Reynolds stress tensor from new Aij tensor ---*/
@@ -1289,9 +1282,4 @@ void CAvgGrad_Base::SetRijfromAij()  {
     }
   }
 
-/* --- Deallocate memory --- */
-  for (iDim = 0; iDim < 3; iDim++){
-    delete [] delta3[iDim];
-  }
-  delete [] delta3;
 }

@@ -130,7 +130,7 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   MaxHF_Visc = nullptr; ForceViscous = nullptr; MomentViscous = nullptr;
   CSkinFriction = nullptr; HF_Visc = nullptr;
 
-//  delta_DD = nullptr; 
+  delta_SDD = nullptr; 
 
   /*--- Set the gamma value ---*/
 
@@ -778,18 +778,6 @@ void CIncNSSolver::Preprocessing(CGeometry *geometry, CSolver **solver_container
 
   }
 
-  /*--- If first interation, do a single node loop to initialise AijML ---*/
-//  if (InnerIter==0){
-////    for (iPoint = 0; iPoint < nPoint; iPoint++) {
-////
-////    su2double turb_solution = solver_container[FLOW_SOL]->GetNodes()->GetSolution(0,0);
-////    cout << turb_solution << endl;
-////    exit(1);
-////    nodes->InitAijML();
-//    exit(1);
-////    }
-//  }
-
   /*--- Initialize the Jacobian matrices ---*/
 
   if (implicit && !Output) Jacobian.SetValZero();
@@ -1132,6 +1120,8 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
     if (using_sdd){
       numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                          solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
+      numerics->SetAijBL(solver_container[TURB_SOL]->GetNodes()->GetAijBL(iPoint),
+                         solver_container[TURB_SOL]->GetNodes()->GetAijBL(jPoint));
     }
 
     /*--- Compute and update residual ---*/

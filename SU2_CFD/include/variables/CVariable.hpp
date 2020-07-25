@@ -2769,4 +2769,9 @@ public:
    */
   inline virtual  su2double **GetAijML(unsigned long iPoint) { return nullptr; }
 
+  /*!
+   * \brief A virtual member.
+   */
+  inline virtual  su2double **GetAijBL(unsigned long iPoint) { return nullptr; }
+
 };
