@@ -114,6 +114,8 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
     Corners[iDim]      = new su2double [2];
   }
   su2double divVel = 0;
+  su2double r3o2  = sqrt(3.0)/2.0;
+  su2double r3i   = 1.0/sqrt(3.0);
 
  /* --- Calculate rate of strain tensor --- */
   for (iDim = 0; iDim < 3; iDim++){
@@ -159,13 +161,15 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
   New_Bary_Coord[0] = Bary_Coord[0] + delta_sdd[0];
   New_Bary_Coord[1] = Bary_Coord[1] + delta_sdd[1];
 
+  /* limit perturbation to be inside barycentric triagle for realizability */
+  New_Bary_Coord[1] = max(0.0,min(r3o2,New_Bary_Coord[1]));  // eta constraint: 0 <= eta <= sqrt(3)/2
+  New_Bary_Coord[0] = max(r3i*New_Bary_Coord[1],min(1.0-r3i*New_Bary_Coord[1],New_Bary_Coord[0])); // zeta constraint: eta/sqrt(3) <= zeta <= 1-(eta/sqrt(3)
+
   /* rebuild c1c,c2c,c3c based on perturbed barycentric coordinates */
   c3c = New_Bary_Coord[1] / Corners[2][1];
   c1c = New_Bary_Coord[0] - Corners[2][0] * c3c;
   c2c = 1 - c1c - c3c;
   //cout << "new" << " " << c1c << " " << c2c << " " << c3c << endl;
-
-  //TODO - limit c1c, c2c, c3c to be realizable here?
 
   /* build new anisotropy eigenvalues */
   Eig_Val[0] = (c3c - 1) / 3.0;
@@ -173,6 +177,8 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
   Eig_Val[2] = c1c + Eig_Val[1];
 
   // TODO - ML derived perturbations to eigenvectors would go here
+  
+  /* Rebuild new Aij tensor */
   EigenRecomposition(newA_ij, Eig_Vec, Eig_Val, 3);
 
   // Save newA_ij in field variable AijML
