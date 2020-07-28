@@ -2772,6 +2772,9 @@ void CConfig::SetConfig_Options() {
   /* DESCRIPTION: Using stochastic data-driven RANS Turbulence model */
   addBoolOption("USING_SDD", using_sdd, false);
 
+  /* DESCRIPTION: Save SDD-RANS Aij_ML tensor */
+  addBoolOption("WRITE_SDD", write_sdd, false);
+
   /* DESCRIPTION: Maximum value of blending parameter gamma to use for SDD */
   addDoubleOption("SDD_GAMMA_MAX", sdd_gamma_max, 1.0);
 
