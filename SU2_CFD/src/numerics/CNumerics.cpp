@@ -236,14 +236,14 @@ CNumerics::~CNumerics(void) {
   if (using_sdd){
     for (unsigned short iDim = 0; iDim < 3; iDim++) {
       delete [] Aij_ML[iDim];
-      delete [] Aij_ML_i[iDim];
-      delete [] Aij_ML_j[iDim];
+//      delete [] Aij_ML_i[iDim];
+//      delete [] Aij_ML_j[iDim];
       delete [] Aij_new[iDim];
       delete [] MeanPerturbedRSM[iDim];
     }
     delete [] Aij_ML;
-    delete [] Aij_ML_i;
-    delete [] Aij_ML_j;
+//    delete [] Aij_ML_i;
+//    delete [] Aij_ML_j;
     delete [] Aij_new;
     delete [] MeanPerturbedRSM;
   }

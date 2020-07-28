@@ -1133,7 +1133,7 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
   }
 
   /*--- Compute SDD-RANS blending parameter gamma ---*/
-  su2double gamma = gamma_max*min(1.0,iter/n_max);
+  su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
   //cout << iter << ", " << gamma << endl;
 
   /*--- BLend Aij_BL and Aij_ML together ---*/

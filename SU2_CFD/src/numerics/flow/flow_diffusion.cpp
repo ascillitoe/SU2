@@ -832,6 +832,7 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
       }
     }
+
   SetBlendedAij(config);
   SetRijfromAij();
   }
@@ -1246,7 +1247,7 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
   }
 
   /*--- Compute SDD-RANS blending parameter gamma ---*/
-  su2double gamma = gamma_max*min(1.0,iter/n_max);
+  su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
   //cout << iter << ", " << gamma << endl;
 
   /*--- BLend Aij_BL and Aij_ML together ---*/
