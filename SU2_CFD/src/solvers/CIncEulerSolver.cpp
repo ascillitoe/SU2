@@ -4382,6 +4382,13 @@ void CIncEulerSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container,
           visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                               solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
 
+        /* Set AijML if SDD-RANS */
+
+        if (config->GetUsing_SDD()){
+          visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
+                                  solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
+        }
+
         /*--- Compute and update residual ---*/
 
         auto residual = visc_numerics->ComputeResidual(config);
@@ -4590,6 +4597,13 @@ void CIncEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
         if ((config->GetKind_Turb_Model() == SST) || (config->GetKind_Turb_Model() == SST_SUST))
           visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                               solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
+
+        /*--- Set Aij_ML if SDD-RANS ---*/
+    
+        if (config->GetUsing_SDD()){
+          visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
+                                  solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
+        }
 
         /*--- Compute and update residual ---*/
 

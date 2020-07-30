@@ -321,7 +321,7 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
     if(first_iter && using_sdd){
       su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
       su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
-      nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd);
+      nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd, dist);
     }
   }
 

@@ -794,7 +794,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
   AD::SetPreaccIn(PrimVar_Grad_i, nDim+1, nDim);
   AD::SetPreaccIn(Vorticity_i, 3);
 
-  unsigned short iDim;
+  unsigned short iDim, jDim;
   su2double alfa_blended, beta_blended;
   su2double diverg, pk, pw, zeta;
   su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
@@ -844,14 +844,20 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
        SetBlendedAij(config);
        SetRijfromAij();
      }
-     SetPerturbedStrainMag(TurbVar_i[0]);
-     pk = Eddy_Viscosity_i*PerturbedStrainMag*PerturbedStrainMag
-          - 2.0/3.0*Density_i*TurbVar_i[0]*diverg;
+//     SetPerturbedStrainMag(TurbVar_i[0]);
+//     pk = Eddy_Viscosity_i*PerturbedStrainMag*PerturbedStrainMag
+//          - 2.0/3.0*Density_i*TurbVar_i[0]*diverg;
+     pk = 0.0;
+     for (iDim = 0; iDim < 3; iDim++){
+       for (jDim = 0; jDim < 3; jDim++){
+         pk += -Density_i*MeanPerturbedRSM[iDim][jDim]*PrimVar_Grad_i[iDim+1][jDim];
+       }
+     }
+//     cout << pk << " " << pk2 << endl;
    }
    else {
      pk = Eddy_Viscosity_i*StrainMag_i*StrainMag_i - 2.0/3.0*Density_i*TurbVar_i[0]*diverg;
    }
-
 
    pk = min(pk,20.0*beta_star*Density_i*TurbVar_i[1]*TurbVar_i[0]);
    pk = max(pk,0.0);
@@ -860,13 +866,17 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
 
    /* if using UQ methodolgy, calculate production using perturbed Reynolds stress matrix */
 
-   if (using_uq || using_sdd){
-     pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
-   }
-   else {
-     pw = StrainMag_i*StrainMag_i - 2.0/3.0*zeta*diverg;
-   }
-   pw = alfa_blended*Density_i*max(pw,0.0);
+//   if (using_uq || using_sdd){
+//     pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
+//   }
+//   else {
+//     pw = StrainMag_i*StrainMag_i - 2.0/3.0*zeta*diverg;
+     
+//   }
+//   pw = alfa_blended*Density_i*max(pw,0.0);
+    su2double sigma_omega_blended = F1_i*sigma_omega_1 + (1.0 - F1_i)*sigma_omega_2;
+    su2double gamma = (beta_blended/beta_star) - sigma_omega_blended*pow(0.41, 2.0)/sqrt(beta_star);
+    pw = gamma*zeta*pk/TurbVar_i[0];
 
    /*--- Sustaining terms, if desired. Note that if the production terms are
          larger equal than the sustaining terms, the original formulation is
@@ -1133,7 +1143,8 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
   }
 
   /*--- Compute SDD-RANS blending parameter gamma ---*/
-  su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
+  //su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
+  su2double gamma = gamma_max*min(1.0,iter/n_max);
   //cout << iter << ", " << gamma << endl;
 
   /*--- BLend Aij_BL and Aij_ML together ---*/
@@ -1141,6 +1152,14 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     for (jDim = 0 ; jDim < 3; jDim++) {
       Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML_i[iDim][jDim];
       //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", BL2 = " << Aij_BL_i[iDim][jDim] << ", ML = " << Aij_ML_i[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
+    }
+  }
+
+  for (iDim = 0 ; iDim < 3; iDim++) {
+    for (jDim = 0 ; jDim < 3; jDim++) {
+      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_BL[iDim][jDim] + delta3[iDim][jDim]/3.0);
+      MeanPerturbedRSM[iDim][jDim] = (1.0-gamma)*MeanPerturbedRSM[iDim][jDim] + gamma*Aij_ML_i[iDim][jDim];
+      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
     }
   }
 
@@ -1161,7 +1180,8 @@ void CSourcePieceWise_TurbSST::SetRijfromAij()  {
   /*--- Set Reynolds stress tensor from new Aij tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-      MeanPerturbedRSM[iDim][jDim] = 2.0 * TurbVar_i[0] * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
+//      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_BL[iDim][jDim] + delta3[iDim][jDim]/3.0);
+//      MeanPerturbedRSM[iDim][jDim] = (1.0-gamma)*MeanPerturbedRSM[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
       //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
     }
   }

@@ -91,7 +91,7 @@ void CTurbSSTVariable::SetBlendingFunc(unsigned long iPoint, su2double val_visco
 
 }
 
-void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd) {
+void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd, su2double dist) {
 
   unsigned short iDim, jDim;
   su2double **S_ij          = new su2double* [3];
@@ -176,17 +176,46 @@ void CTurbSSTVariable::InitAijML(unsigned long iPoint, su2double muT, su2double 
   Eig_Val[1] = 0.5 *c2c + Eig_Val[0];
   Eig_Val[2] = c1c + Eig_Val[1];
 
-  // TODO - ML derived perturbations to eigenvectors would go here
-  
+//  /* build new eigenvectors */
+//  su2double h1 = delta_sdd[2];
+//  su2double h2 = delta_sdd[3];
+//  su2double h3 = delta_sdd[4];
+//  su2double h4 = sqrt(1.0- (h1*h1 + h2*h2 + h3*h3));
+//  cout << h1 << " " << h2 << " " << h3 << " " << h4 << " " << sqrt(h1*h1+h2*h2+h3*h3+h4*h4) << endl;
+
+
   /* Rebuild new Aij tensor */
   EigenRecomposition(newA_ij, Eig_Vec, Eig_Val, 3);
 
-  // Save newA_ij in field variable AijML
+//  // Save newA_ij in field variable AijML
+//  for (iDim = 0; iDim < 3; iDim++){
+//    for (jDim = 0; jDim < 3; jDim++){
+//      Aij_ML(iPoint,iDim,jDim) = newA_ij[iDim][jDim];
+//    }	    
+//  }
+  Aij_ML(iPoint,0,0) = delta_sdd[0];
+  Aij_ML(iPoint,1,1) = delta_sdd[1];
+  Aij_ML(iPoint,2,2) = delta_sdd[2];
+  Aij_ML(iPoint,0,1) = delta_sdd[3];
+  Aij_ML(iPoint,0,2) = 0.0;
+  Aij_ML(iPoint,1,2) = 0.0;
+  Aij_ML(iPoint,1,0) = Aij_ML(iPoint,0,1);
+  Aij_ML(iPoint,2,0) = Aij_ML(iPoint,0,2);
+  Aij_ML(iPoint,2,1) = Aij_ML(iPoint,1,2);
+
+  su2double delta_k = delta_sdd[5];
+  su2double new_turb_ke = pow(10.0,delta_k)*turb_ke;
+
+//  cout << dist << " " << turb_ke << " " << delta_k << " " << new_turb_ke << endl;
+  if (dist<1e-10) new_turb_ke = 0.0;
+
   for (iDim = 0; iDim < 3; iDim++){
     for (jDim = 0; jDim < 3; jDim++){
-      Aij_ML(iPoint,iDim,jDim) = newA_ij[iDim][jDim];
+      Aij_ML(iPoint,iDim,jDim) =  2.0 * new_turb_ke * (Aij_ML(iPoint,iDim,jDim) + delta3[iDim][jDim]/3.0);
     }	    
   }
+  //cout << dist << " " << Aij_ML(iPoint,0,0) << " " << Aij_ML(iPoint,1,1)  << " " << Aij_ML(iPoint,0,1)  << endl;
+
 
   /* --- Deallocate memory --- */
     for (iDim = 0; iDim < 3; iDim++){
