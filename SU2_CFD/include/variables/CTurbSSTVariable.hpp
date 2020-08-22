@@ -75,7 +75,7 @@ public:
    */
   void SetBlendingFunc(unsigned long iPoint, su2double val_viscosity, su2double val_dist, su2double val_density) override;
 
-  void InitSDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd, su2double dist, su2double *coord) override;
+  void InitSDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd, su2double dist) override;
 
   /*!
    * \brief Get the first blending function.
@@ -167,30 +167,6 @@ public:
    * \param[in] q: The quarternion
    */
   static void q_norm(su2double *q);
-
-  /*!
-   * \brief Decomposes the 3x3 symmetric matrix A, into eigenvectors and eigenvalues
-   * \param[in] A: 3x3 symmetric matrix to be decomposed
-   * \param[in] Eig_Vec: strores the eigenvectors
-   * \param[in] Eig_Val: stores the eigenvalues
-   */
-  static void EigenSolve(su2double **A, su2double **Eig_Vec, su2double *Eig_Val);
-
-  static su2double *Cross(su2double U[3], su2double V[3]);
-
-  static void ComputeOrthogonalComplement(su2double *W, su2double *U, su2double *V);
-
-  static void ComputeEigenvector0(su2double **A, su2double eval0, su2double *evec0);
-
-  static void ComputeEigenvector1(su2double **A, su2double *evec0, su2double eval1, su2double *evec1); 
-
-  static su2double *Multiply(su2double s, su2double *U);
-
-  static su2double *Subtract(su2double *U, su2double *V);
-
-  static su2double *Divide(su2double *U, su2double s);
-  
-  static su2double Dot(su2double *U, su2double *V);
 
   static unsigned int *EigenSort(su2double *Eig_Val);
 
