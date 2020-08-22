@@ -832,9 +832,9 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
       }
     }
-
-  SetBlendedAij(config);
-  SetRijfromAij();
+    TKE_ML = 0.5*(TKE_ML_i+TKE_ML_j);
+    SetBlendedAij(config);
+    //SetRijfromAij();
   }
 
   /*--- Get projected flux tensor (viscous residual) ---*/
@@ -1166,8 +1166,9 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
       }
     }
+  TKE_ML = 0.5*(TKE_ML_i+TKE_ML_j);
   SetBlendedAij(config);
-  SetRijfromAij();
+  //SetRijfromAij();
   }
 
   /*--- Get projected flux tensor (viscous residual) ---*/
@@ -1247,23 +1248,22 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
   }
 
   /*--- Compute SDD-RANS blending parameter gamma ---*/
-  //su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
   su2double gamma = gamma_max*min(1.0,iter/n_max);
-  //cout << iter << ", " << gamma << endl;
 
   /*--- BLend Aij_BL and Aij_ML together ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-//      Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
- //     cout << "iDim: "<< iDim << "," << "jDim: " << jDim << "BL = " << Aij_BL[iDim][jDim] << ", ML = " << Aij_ML[iDim][jDim] << ", new = " << Aij_new[iDim][jDim] <<endl;
+      Aij_new[iDim][jDim] = (1.0-gamma)*Aij_BL[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
     }
   }
 
+  // TODO - blend exact tke and ML one
+  su2double new_turb_ke = (1.0-gamma)*turb_ke + gamma*TKE_ML_i;
+
+  /*--- Set Reynolds stress tensor from new Aij tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_BL[iDim][jDim] + delta3[iDim][jDim]/3.0);
-      MeanPerturbedRSM[iDim][jDim] = (1.0-gamma)*MeanPerturbedRSM[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
-      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
+      MeanPerturbedRSM[iDim][jDim] = 2.0 * new_turb_ke * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
     }
   }
 
@@ -1284,9 +1284,7 @@ void CAvgGrad_Base::SetRijfromAij()  {
   /*--- Set Reynolds stress tensor from new Aij tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
     for (jDim = 0 ; jDim < 3; jDim++) {
-//      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_BL[iDim][jDim] + delta3[iDim][jDim]/3.0);
-//      MeanPerturbedRSM[iDim][jDim] = (1.0-gamma)*MeanPerturbedRSM[iDim][jDim] + gamma*Aij_ML[iDim][jDim];
-      //cout << "iDim: "<< iDim << "," << "jDim: " << jDim << " " << MeanPerturbedRSM[iDim][jDim] <<endl;
+      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
     }
   }
 

@@ -321,7 +321,8 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
     if(first_iter && using_sdd){
       su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
       su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
-      nodes->InitAijML(iPoint, muT, kine, rho, PrimGrad, delta_sdd, dist);
+      //nodes->InitSDD(iPoint, muT, kine, rho, PrimGrad, delta_sdd, dist);
+      nodes->InitSDD(iPoint, muT, kine, rho, PrimGrad, delta_sdd, dist,geometry->nodes->GetCoord(iPoint));
     }
   }
 
@@ -385,6 +386,7 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     if (using_sdd){
       numerics->SetAijML(nodes->GetAijML(iPoint),nullptr);
+      numerics->SetTKEML(nodes->GetTKEML(iPoint),0.0);
     }
    
     /*--- Compute the source term ---*/

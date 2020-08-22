@@ -4387,6 +4387,8 @@ void CIncEulerSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container,
         if (config->GetUsing_SDD()){
           visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                                   solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
+          visc_numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),
+                                  solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint));
         }
 
         /*--- Compute and update residual ---*/
@@ -4603,6 +4605,8 @@ void CIncEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
         if (config->GetUsing_SDD()){
           visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                                   solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
+          visc_numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),
+                                  solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint));
         }
 
         /*--- Compute and update residual ---*/

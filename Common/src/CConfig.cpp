@@ -2781,6 +2781,9 @@ void CConfig::SetConfig_Options() {
   /* DESCRIPTION: Number of iterations after which gamma is fixed to gamma_max */
   addUnsignedLongOption("SDD_N_MAX", sdd_n_max, 1000);
 
+  /* DESCRIPTION: Using Uncertainty Quantification with SST Turbulence Model */
+  addBoolOption("WRITE_DIST", write_dist, false);
+
   /* DESCRIPTION: Number of calls to 'Build' that trigger re-factorization (0 means only once). */
   addUnsignedLongOption("PASTIX_FACTORIZATION_FREQUENCY", pastix_fact_freq, 1);
 

@@ -39,7 +39,8 @@ CFlowIncOutput::CFlowIncOutput(CConfig *config, unsigned short nDim) : CFlowOutp
 
   weakly_coupled_heat = config->GetWeakly_Coupled_Heat();
 
-  write_sdd = config->GetWrite_SDD();
+  write_sdd  = config->GetWrite_SDD();
+  write_dist = config->GetWrite_Dist();
 
   /*--- Set the default history fields if nothing is set in the config file ---*/
 
@@ -70,6 +71,12 @@ CFlowIncOutput::CFlowIncOutput(CConfig *config, unsigned short nDim) : CFlowOutp
     requestedVolumeFields.emplace_back("SDD");
     nRequestedVolumeFields = requestedVolumeFields.size();
   }
+
+  if (write_dist) {
+    requestedVolumeFields.emplace_back("Dist");
+    nRequestedVolumeFields = requestedVolumeFields.size();
+  }
+
 
   stringstream ss;
   ss << "Zone " << config->GetiZone() << " (Incomp. Fluid)";
@@ -467,7 +474,7 @@ void CFlowIncOutput::SetVolumeOutputFields(CConfig *config){
   // Hybrid RANS-LES
   if (config->GetKind_HybridRANSLES() != NO_HYBRIDRANSLES){
     AddVolumeOutput("DES_LENGTHSCALE", "DES_LengthScale", "DDES", "DES length scale value");
-    AddVolumeOutput("WALL_DISTANCE", "Wall_Distance", "DDES", "Wall distance value");
+    AddVolumeOutput("WAL  DISTANCE", "Wall_Distance", "DDES", "Wall distance value");
   }
 
   // Roe Low Dissipation
@@ -493,6 +500,10 @@ void CFlowIncOutput::SetVolumeOutputFields(CConfig *config){
        AddVolumeOutput("A12_ML", "A12_ML", "SDD", "Aij ML - 12 component");
        AddVolumeOutput("A13_ML", "A13_ML", "SDD", "Aij ML - 13 component");
        AddVolumeOutput("A23_ML", "A23_ML", "SDD", "Aij ML - 23 component");
+  }
+
+  if (write_dist) {
+    AddVolumeOutput("WALL_DISTANCE", "Wall_Distance", "Dist", "Wall distance value");
   }
 }
 
@@ -649,6 +660,9 @@ void CFlowIncOutput::LoadVolumeData(CConfig *config, CGeometry *geometry, CSolve
     SetVolumeOutputValue("A23_ML", iPoint, Node_Turb->GetAijML(iPoint)[1][2]);
   }
 
+  if (write_dist) {
+    SetVolumeOutputValue("WALL_DISTANCE", iPoint, Node_Geo->GetWall_Distance(iPoint));
+  }
 }
 
 void CFlowIncOutput::LoadSurfaceData(CConfig *config, CGeometry *geometry, CSolver **solver, unsigned long iPoint, unsigned short iMarker, unsigned long iVertex){

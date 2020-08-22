@@ -1133,6 +1133,7 @@ private:
   bool write_sdd;               /*!< \brief Writing out aij_BL to give to ML */
   su2double sdd_gamma_max;      /*!< \brief Maximum value of blending parameter gamma for SDD-RANS */
   unsigned long sdd_n_max;      /*!< \brief Number of iterations at which gamma reaches gamma_max */
+  bool write_dist;              /*!< \brief Write wall distance to flow file */
 
   unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
   unsigned short pastix_verb_lvl;  /*!< \brief Verbosity level for PaStiX */
@@ -8890,6 +8891,12 @@ public:
    * \return <code>TRUE</code> means that aij will be written out in solution file
    */
   bool GetWrite_SDD(void) const { return write_sdd; }
+
+  /*!
+   * \brief Get information about whether to use write wall distance to file
+   * \return <code>TRUE</code> means that wall distance will be written out in solution file
+   */
+  bool GetWrite_Dist(void) const { return write_dist; }
 
   /*!
    * \brief Get information about whether to use wall functions.

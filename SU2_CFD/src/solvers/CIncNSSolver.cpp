@@ -1120,6 +1120,8 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
     if (using_sdd){
       numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                          solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
+      numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),
+                         solver_container[TURB_SOL]->GetNodes()->GetTKEML(jPoint));
     }
 
     /*--- Compute and update residual ---*/

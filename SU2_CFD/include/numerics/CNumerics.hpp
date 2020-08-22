@@ -226,6 +226,7 @@ protected:
 
   /* Supporting data structures for sdd-rans methodology */
   su2double **Aij_ML, **Aij_ML_i, **Aij_ML_j;
+  su2double TKE_ML, TKE_ML_i, TKE_ML_j;
   su2double **Aij_new;
 
 public:
@@ -562,6 +563,16 @@ public:
   inline void SetAijML(su2double **val_Aij_ML_i, su2double **val_Aij_ML_j) {
     Aij_ML_i = val_Aij_ML_i;
     Aij_ML_j = val_Aij_ML_j;
+  }
+
+   /*!
+   * \brief Set the ML derived turbulent kinetic energy. 
+   * \param[in] val_Aij_ML_i - Value of TKE_ML at point i.
+   * \param[in] val_Aij_ML_j - Value of TKE_ML at point j.
+   */
+  inline void SetTKEML(su2double val_TKE_ML_i, su2double val_TKE_ML_j) {
+    TKE_ML_i = val_TKE_ML_i;
+    TKE_ML_j = val_TKE_ML_j;
   }
 
   /*!

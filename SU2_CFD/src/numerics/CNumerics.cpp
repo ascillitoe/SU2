@@ -61,7 +61,6 @@ CNumerics::CNumerics(void) {
   Aij_ML_i = nullptr;
   Aij_ML_j = nullptr;
   Aij_new  = nullptr;
-
 }
 
 CNumerics::CNumerics(unsigned short val_nDim, unsigned short val_nVar,
