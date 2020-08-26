@@ -865,6 +865,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
 
    if (using_uq){
      pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
+     pw = alfa_blended*Density_i*max(pw,0.0);
    }
    else if (using_sdd){
      su2double sigma_omega_blended = F1_i*sigma_omega_1 + (1.0 - F1_i)*sigma_omega_2;
@@ -873,6 +874,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
    }
    else {
      pw = StrainMag_i*StrainMag_i - 2.0/3.0*zeta*diverg;
+     pw = alfa_blended*Density_i*max(pw,0.0);
    }
 
    /*--- Sustaining terms, if desired. Note that if the production terms are
