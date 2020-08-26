@@ -844,7 +844,6 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
    }
    else if (using_sdd) {
      SetBlendedAij(config);
-     //SetRijfromAij();
      pk = 0.0;
      for (iDim = 0; iDim < 3; iDim++){
        for (jDim = 0; jDim < 3; jDim++){
@@ -1168,17 +1167,4 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     }
     delete [] S_ij;
     delete [] Aij_BL;
-}
-
-void CSourcePieceWise_TurbSST::SetRijfromAij()  {
-
-  unsigned short iDim, jDim;
-  su2double turb_ke   = TurbVar_i[0];
-  
-  /*--- Set Reynolds stress tensor from new Aij tensor ---*/
-  for (iDim = 0 ; iDim < 3; iDim++) {
-    for (jDim = 0 ; jDim < 3; jDim++) {
-      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
-    }
-  }
 }

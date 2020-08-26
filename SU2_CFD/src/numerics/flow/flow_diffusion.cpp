@@ -834,7 +834,6 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
     }
     TKE_ML = 0.5*(TKE_ML_i+TKE_ML_j);
     SetBlendedAij(config);
-    //SetRijfromAij();
   }
 
   /*--- Get projected flux tensor (viscous residual) ---*/
@@ -1168,7 +1167,6 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
     }
   TKE_ML = 0.5*(TKE_ML_i+TKE_ML_j);
   SetBlendedAij(config);
-  //SetRijfromAij();
   }
 
   /*--- Get projected flux tensor (viscous residual) ---*/
