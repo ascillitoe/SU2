@@ -29,9 +29,9 @@ See the file `convert.py` for an example helper script to read the perturbations
 
 `DD_GAMMA_MAX`: Maximum blending factor to blend original RANS and new Aij fields together i.e. `Aij_new = (1-gamma_max)*Aij_orig + gamma_max*Aij_DD`
 
-`DD_N_MAX`: The blending factor gamma is ramped up intil iteration `n=n_max`, where `gamma=gamma_max`.
+`DD_N_MAX`: The blending factors gamma and alpha are ramped up until iteration `n=n_max`, where `gamma=gamma_max` and `alpha=alpha_max`.
 
-`TKE_PERTURB=YES/NO`: If yes then perturb the original RANS TKE field by delta_logk, if NO then use the k and w from the k and w equations, with the k production set as the exact production term corresponding to the perturbed Reynolds stress field i.e. Pk=tau_ij:grad(U). 
+`DD_ALPHA_MAX`: Blend the turb. kinetic energy (TKE) field between the exact one i.e. with the k production set as the exact production term corresponding to the perturbed Reynolds stress field i.e. Pk=tau:grad(U), and the original RANS TKE field perturbed by delta_logk i.e. `TKE=(1-alpha)*TKE_exact + alpha*TKE_perturbed`. `DD_ALPHA_MAX=0` gives a strategy like the "continuation" solver described by [Kaandorp and Dwight](https://arxiv.org/abs/1810.08794), `DD_ALPHA_MAX=1` gives a strategy similar to [Wang et al.](https://arxiv.org/abs/1606.07987). Ideally, if the DNS anisotropy tensor is fed in (by perturbing the eigen-values and vectors), using the exact TKE production (`DD_ALPHA_MAX=0`) should result in convergence to something near to the DNS flow field (assuming no significant non-local turbulence effects). However, in practice, this appears to be sensitive to the initial condition and mesh quality (perhaps because both of these can lead to under prediction of grad(U)). Therefore, blending in some of the perturbed TKE field (at least at first) can be useful. 
 
 `WRITE_DIST=YES/NO`: Write the wall distance field to the solution file (can be useful as an input feature for machine learning approaches).
 
