@@ -39,7 +39,7 @@ CFlowIncOutput::CFlowIncOutput(CConfig *config, unsigned short nDim) : CFlowOutp
 
   weakly_coupled_heat = config->GetWeakly_Coupled_Heat();
 
-  write_sdd  = config->GetWrite_SDD();
+  write_dd  = config->GetWrite_DD();
   write_dist = config->GetWrite_Dist();
 
   /*--- Set the default history fields if nothing is set in the config file ---*/
@@ -67,8 +67,8 @@ CFlowIncOutput::CFlowIncOutput(CConfig *config, unsigned short nDim) : CFlowOutp
     nRequestedVolumeFields = requestedVolumeFields.size();
   }
 
-  if (write_sdd) {
-    requestedVolumeFields.emplace_back("SDD");
+  if (write_dd) {
+    requestedVolumeFields.emplace_back("DD");
     nRequestedVolumeFields = requestedVolumeFields.size();
   }
 
@@ -493,13 +493,13 @@ void CFlowIncOutput::SetVolumeOutputFields(CConfig *config){
     AddVolumeOutput("Q_CRITERION", "Q_Criterion", "VORTEX_IDENTIFICATION", "Value of the Q-Criterion");
   }
 
-  if (write_sdd) {
-       AddVolumeOutput("A11_ML", "A11_ML", "SDD", "Aij ML - 11 component");
-       AddVolumeOutput("A22_ML", "A22_ML", "SDD", "Aij ML - 22 component");
-       AddVolumeOutput("A33_ML", "A33_ML", "SDD", "Aij ML - 33 component");
-       AddVolumeOutput("A12_ML", "A12_ML", "SDD", "Aij ML - 12 component");
-       AddVolumeOutput("A13_ML", "A13_ML", "SDD", "Aij ML - 13 component");
-       AddVolumeOutput("A23_ML", "A23_ML", "SDD", "Aij ML - 23 component");
+  if (write_dd) {
+       AddVolumeOutput("A11_ML", "A11_ML", "DD", "Aij ML - 11 component");
+       AddVolumeOutput("A22_ML", "A22_ML", "DD", "Aij ML - 22 component");
+       AddVolumeOutput("A33_ML", "A33_ML", "DD", "Aij ML - 33 component");
+       AddVolumeOutput("A12_ML", "A12_ML", "DD", "Aij ML - 12 component");
+       AddVolumeOutput("A13_ML", "A13_ML", "DD", "Aij ML - 13 component");
+       AddVolumeOutput("A23_ML", "A23_ML", "DD", "Aij ML - 23 component");
   }
 
   if (write_dist) {
@@ -651,7 +651,7 @@ void CFlowIncOutput::LoadVolumeData(CConfig *config, CGeometry *geometry, CSolve
     SetVolumeOutputValue("Q_CRITERION", iPoint, GetQ_Criterion(&(Node_Flow->GetGradient_Primitive(iPoint)[1])));
   }
 
-  if (write_sdd){
+  if (write_dd){
     SetVolumeOutputValue("A11_ML", iPoint, Node_Turb->GetAijML(iPoint)[0][0]);
     SetVolumeOutputValue("A22_ML", iPoint, Node_Turb->GetAijML(iPoint)[1][1]);
     SetVolumeOutputValue("A33_ML", iPoint, Node_Turb->GetAijML(iPoint)[2][2]);

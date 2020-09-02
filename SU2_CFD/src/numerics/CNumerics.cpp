@@ -54,8 +54,8 @@ CNumerics::CNumerics(void) {
 
   using_uq = false;
 
-  using_sdd = false;
-  write_sdd = false;
+  using_dd = false;
+  write_dd = false;
 
   Aij_ML = nullptr;
   Aij_ML_i = nullptr;
@@ -153,8 +153,8 @@ CNumerics::CNumerics(unsigned short val_nDim, unsigned short val_nVar,
     Corners[2][1] = 0.866025;
   }
 
-  using_sdd = config->GetUsing_SDD();
-  if (using_sdd){
+  using_dd = config->GetUsing_DD();
+  if (using_dd){
     Aij_ML           = new su2double* [3];
     Aij_ML_i         = new su2double* [3];
     Aij_ML_j         = new su2double* [3];
@@ -232,7 +232,7 @@ CNumerics::~CNumerics(void) {
     delete [] New_Coord;
   }
 
-  if (using_sdd){
+  if (using_dd){
     for (unsigned short iDim = 0; iDim < 3; iDim++) {
       delete [] Aij_ML[iDim];
 //      delete [] Aij_ML_i[iDim];

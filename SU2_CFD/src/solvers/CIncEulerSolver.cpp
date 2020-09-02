@@ -1369,7 +1369,7 @@ void CIncEulerSolver::SetInitialCondition(CGeometry **geometry, CSolver ***solve
                     (config->GetKind_Solver() == DISC_ADJ_INC_RANS));
   bool dual_time = ((config->GetTime_Marching() == DT_STEPPING_1ST) ||
                     (config->GetTime_Marching() == DT_STEPPING_2ND));
-  bool using_sdd = (config->GetUsing_SDD());
+  bool using_dd = (config->GetUsing_DD());
 
   /*--- Check if a verification solution is to be computed. ---*/
   if ((VerificationSolution) && (TimeIter == 0) && !restart) {
@@ -4382,9 +4382,9 @@ void CIncEulerSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container,
           visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                               solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
 
-        /* Set AijML if SDD-RANS */
+        /* Set AijML if DD-RANS */
 
-        if (config->GetUsing_SDD()){
+        if (config->GetUsing_DD()){
           visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                                   solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
           visc_numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),
@@ -4600,9 +4600,9 @@ void CIncEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
           visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                               solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
 
-        /*--- Set Aij_ML if SDD-RANS ---*/
+        /*--- Set Aij_ML if DD-RANS ---*/
     
-        if (config->GetUsing_SDD()){
+        if (config->GetUsing_DD()){
           visc_numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                                   solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint));
           visc_numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),
@@ -5897,12 +5897,12 @@ void CIncEulerSolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConf
       nodes->SetSolution(iPoint_Local,Solution);
       iPoint_Global_Local++;
 
-      /*--- Load vector of delta's if using sdd-rans.
-       TODO - Assuming delta_SDD stored after primitives and turbulence var's, probs need to fix this to work with dynamic_grid. ---*/
-      if (config->GetUsing_SDD()) {
+      /*--- Load vector of delta's if using dd-rans.
+       TODO - Assuming delta_DD stored after primitives and turbulence var's, probs need to fix this to work with dynamic_grid. ---*/
+      if (config->GetUsing_DD()) {
         index = counter*Restart_Vars[1] + skipVars + nVar_Restart + turbVars;
-        for (iVar = 0; iVar < 6; iVar++) delta_SDD[iVar] = Restart_Data[index+iVar];
-        nodes->SetSDD(iPoint_Local,delta_SDD);
+        for (iVar = 0; iVar < 6; iVar++) delta_DD[iVar] = Restart_Data[index+iVar];
+        nodes->SetDD(iPoint_Local,delta_DD);
       }
 
       /*--- For dynamic meshes, read in and store the

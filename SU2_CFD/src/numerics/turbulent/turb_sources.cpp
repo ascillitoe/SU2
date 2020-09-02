@@ -842,7 +842,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
        pk = Eddy_Viscosity_i*PerturbedStrainMag*PerturbedStrainMag
             - 2.0/3.0*Density_i*TurbVar_i[0]*diverg;
    }
-   else if (using_sdd) {
+   else if (using_dd) {
      SetBlendedAij(config);
      pk = 0.0;
      for (iDim = 0; iDim < 3; iDim++){
@@ -861,13 +861,13 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSST::ComputeResidual(const CConfi
 
    zeta = max(TurbVar_i[1], VorticityMag*F2_i/a1);
 
-   /* if using UQ or SDD methodolgy, calculate production using perturbed Reynolds stress matrix */
+   /* if using UQ or DD methodolgy, calculate production using perturbed Reynolds stress matrix */
 
    if (using_uq){
      pw = PerturbedStrainMag * PerturbedStrainMag - 2.0/3.0*zeta*diverg;
      pw = alfa_blended*Density_i*max(pw,0.0);
    }
-   else if (using_sdd){
+   else if (using_dd){
      su2double sigma_omega_blended = F1_i*sigma_omega_1 + (1.0 - F1_i)*sigma_omega_2;
      su2double gamma = (beta_blended/beta_star) - sigma_omega_blended*pow(0.41, 2.0)/sqrt(beta_star);
      pw = gamma*zeta*pk/TurbVar_i[0];
@@ -1115,9 +1115,9 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     S_ij[iDim]   = new su2double [3];
     Aij_BL[iDim] = new su2double [3];
   }
-  su2double gamma_max = config->GetSDD_GammaMax();
-  su2double alpha_max = config->GetSDD_AlphaMax();
-  su2double n_max     = config->GetSDD_NMax();
+  su2double gamma_max = config->GetDD_GammaMax();
+  su2double alpha_max = config->GetDD_AlphaMax();
+  su2double n_max     = config->GetDD_NMax();
   unsigned long iter  = config->GetInnerIter();
   su2double rho       = Density_i;
   su2double muT       = Eddy_Viscosity_i;
@@ -1142,7 +1142,7 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  /*--- Compute SDD-RANS blending parameters gamma and alpha ---*/
+  /*--- Compute DD-RANS blending parameters gamma and alpha ---*/
   su2double gamma = gamma_max*min(1.0,iter/n_max);
   su2double alpha = alpha_max*min(1.0,iter/n_max);
 

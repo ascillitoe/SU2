@@ -2770,19 +2770,19 @@ void CConfig::SetConfig_Options() {
   addBoolOption("UQ_PERMUTE", uq_permute, false);
 
   /* DESCRIPTION: Using stochastic data-driven RANS Turbulence model */
-  addBoolOption("USING_SDD", using_sdd, false);
+  addBoolOption("USING_DD", using_dd, false);
 
-  /* DESCRIPTION: Save SDD-RANS Aij_ML tensor */
-  addBoolOption("WRITE_SDD", write_sdd, false);
+  /* DESCRIPTION: Save DD-RANS Aij_ML tensor */
+  addBoolOption("WRITE_DD", write_dd, false);
 
-  /* DESCRIPTION: Maximum value of blending parameter gamma to use for SDD */
-  addDoubleOption("SDD_GAMMA_MAX", sdd_gamma_max, 1.0);
+  /* DESCRIPTION: Maximum value of blending parameter gamma to use for DD */
+  addDoubleOption("DD_GAMMA_MAX", dd_gamma_max, 1.0);
 
-  /* DESCRIPTION: Maximum value of blending parameter alpha to use for SDD */
-  addDoubleOption("SDD_ALPHA_MAX", sdd_alpha_max, 1.0);
+  /* DESCRIPTION: Maximum value of blending parameter alpha to use for DD */
+  addDoubleOption("DD_ALPHA_MAX", dd_alpha_max, 1.0);
 
   /* DESCRIPTION: Number of iterations after which gamma and alpha are fixed to gamma_max and alpha_max */
-  addUnsignedLongOption("SDD_N_MAX", sdd_n_max, 1000);
+  addUnsignedLongOption("DD_N_MAX", dd_n_max, 1000);
 
   /* DESCRIPTION: Using Uncertainty Quantification with SST Turbulence Model */
   addBoolOption("WRITE_DIST", write_dist, false);
@@ -4482,12 +4482,12 @@ void CConfig::SetPostprocessing(unsigned short val_software, unsigned short val_
 
   /* --- Throw error if UQ used for any turbulence model other that SST --- */
 
-  if (Kind_Solver == RANS && Kind_Turb_Model != SST && Kind_Turb_Model != SST_SUST && using_sdd){
-    SU2_MPI::Error("SDD-RANS capabilities only implemented for NAVIER_STOKES solver SST turbulence model", CURRENT_FUNCTION);
+  if (Kind_Solver == RANS && Kind_Turb_Model != SST && Kind_Turb_Model != SST_SUST && using_dd){
+    SU2_MPI::Error("DD-RANS capabilities only implemented for NAVIER_STOKES solver SST turbulence model", CURRENT_FUNCTION);
   }
 
-  if (using_uq && using_sdd){
-    SU2_MPI::Error("Cannot use USING_UQ and USING_SDD together", CURRENT_FUNCTION);
+  if (using_uq && using_dd){
+    SU2_MPI::Error("Cannot use USING_UQ and USING_DD together", CURRENT_FUNCTION);
   }
 
   /*--- If there are not design variables defined in the file ---*/

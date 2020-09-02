@@ -49,7 +49,7 @@ CTurbSSTVariable::CTurbSSTVariable(su2double kine, su2double omega, su2double mu
 
   muT.resize(nPoint) = mut;
 
-  if (config->GetUsing_SDD()) {
+  if (config->GetUsing_DD()) {
     Aij_ML.resize(nPoint,3,3);
     TKE_ML.resize(nPoint);
   }  
@@ -92,7 +92,7 @@ void CTurbSSTVariable::SetBlendingFunc(unsigned long iPoint, su2double val_visco
 
 }
 
-void CTurbSSTVariable::InitSDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd, su2double dist) {
+void CTurbSSTVariable::InitDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_dd, su2double dist) {
 
   unsigned short iDim, jDim;
   unsigned int *idx = new unsigned int[3];
@@ -171,8 +171,8 @@ void CTurbSSTVariable::InitSDD(unsigned long iPoint, su2double muT, su2double tu
   Bary_Coord[1] = Corners[0][1] * c1c + Corners[1][1] * c2c + Corners[2][1] * c3c;
 
   /* Add ML derived delta to barycentric coordinates */
-  New_Bary_Coord[0] = Bary_Coord[0] + delta_sdd[0];
-  New_Bary_Coord[1] = Bary_Coord[1] + delta_sdd[1];
+  New_Bary_Coord[0] = Bary_Coord[0] + delta_dd[0];
+  New_Bary_Coord[1] = Bary_Coord[1] + delta_dd[1];
 
   /* limit perturbation to be inside barycentric triagle for realizability */
   New_Bary_Coord[1] = max(0.0,min(r3o2,New_Bary_Coord[1]));  // eta constraint: 0 <= eta <= sqrt(3)/2
@@ -192,9 +192,9 @@ void CTurbSSTVariable::InitSDD(unsigned long iPoint, su2double muT, su2double tu
   Eig_Val[0] = c1c + Eig_Val[2];
 
   /* Get rotation quaternion */
-  h_r[1] = delta_sdd[2];
-  h_r[2] = delta_sdd[3];
-  h_r[3] = delta_sdd[4];
+  h_r[1] = delta_dd[2];
+  h_r[2] = delta_dd[3];
+  h_r[3] = delta_dd[4];
   h_r[0] = sqrt(1.0 - (h_r[1]*h_r[1] + h_r[2]*h_r[2] + h_r[3]*h_r[3])); // assuming unit quarternion
 
   /* Get original quaternion */
@@ -217,7 +217,7 @@ void CTurbSSTVariable::InitSDD(unsigned long iPoint, su2double muT, su2double tu
     }	    
   }
 
-  su2double delta_k = delta_sdd[5];
+  su2double delta_k = delta_dd[5];
 
   if (dist<1e-10) {
     TKE_ML(iPoint) = 0.0;

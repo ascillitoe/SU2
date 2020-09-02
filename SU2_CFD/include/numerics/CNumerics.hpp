@@ -217,14 +217,14 @@ protected:
   su2double uq_urlx;              /*!< \brief Under-relaxation factor for numerical stability */
   bool uq_permute;                /*!< \brief Flag for eigenvector permutation */
 
-  bool using_sdd;
-  bool write_sdd;
+  bool using_dd;
+  bool write_dd;
 
   /* Supporting data structures for the eigenspace perturbation for UQ methodology */
   su2double **A_ij, **newA_ij, **Eig_Vec, **New_Eig_Vec, **Corners;
   su2double *Eig_Val, *Barycentric_Coord, *New_Coord;
 
-  /* Supporting data structures for sdd-rans methodology */
+  /* Supporting data structures for dd-rans methodology */
   su2double **Aij_ML, **Aij_ML_i, **Aij_ML_j;
   su2double TKE_ML, TKE_ML_i, TKE_ML_j;
   su2double **Aij_new;

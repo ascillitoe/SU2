@@ -97,8 +97,8 @@ protected:
   su2matrix<int> AD_InputIndex;    /*!< \brief Indices of Solution variables in the adjoint vector. */
   su2matrix<int> AD_OutputIndex;   /*!< \brief Indices of Solution variables in the adjoint vector after having been updated. */
 
-   /*--- SDD-RANS delta's ---*/
-  MatrixType delta_SDD;                    /*!< \brief delta SDD vector to be read in. Currently only eigenvalue delta's in cartesian 
+   /*--- DD-RANS delta's ---*/
+  MatrixType delta_DD;                    /*!< \brief delta DD vector to be read in. Currently only eigenvalue delta's in cartesian 
 					     co-ords ( delta_zeta, delta_eta ). 6D vector to make space for log(k) and eigenvector delta's later.  */
 
   unsigned long nPoint = 0;  /*!< \brief Number of points in the domain. */
@@ -150,13 +150,13 @@ public:
   }
 
     /*!
-   * \brief Set the value of the delta_SDD vector for all indices.
+   * \brief Set the value of the delta_DD vector for all indices.
    * \param[in] iPoint - Point index.
-   * \param[in] val_delta - delta_SDD value.
-   * \return Set the value of delta_SDD for all indices.
+   * \param[in] val_delta - delta_DD value.
+   * \return Set the value of delta_DD for all indices.
    */
-  inline void SetSDD(unsigned long iPoint, const su2double *val_delta) {
-    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_SDD(iPoint,iVar) = val_delta[iVar];
+  inline void SetDD(unsigned long iPoint, const su2double *val_delta) {
+    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_DD(iPoint,iVar) = val_delta[iVar];
   }
 
   /*!
@@ -464,11 +464,11 @@ public:
   inline su2double *GetSolution(unsigned long iPoint) { return Solution[iPoint]; }
 
    /*!
-   * \brief Get the delta_SDD at <i>iPoint<i>.
+   * \brief Get the delta_DD at <i>iPoint<i>.
    * \param[in] iPoint - Point index.
-   * \return Value of the delta_SDD.
+   * \return Value of the delta_DD.
    */
-  inline su2double *GetSDD(unsigned long iPoint) { return delta_SDD[iPoint]; }
+  inline su2double *GetDD(unsigned long iPoint) { return delta_DD[iPoint]; }
 
   /*!
    * \brief Get the old solution of the problem (Runge-Kutta method)
@@ -1980,7 +1980,7 @@ public:
    */
   inline virtual void SetBlendingFunc(unsigned long iPoint, su2double val_viscosity, su2double val_dist, su2double val_density) {}
 
-  inline virtual void InitSDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_sdd, su2double dist) {}
+  inline virtual void InitDD(unsigned long iPoint, su2double muT, su2double turb_ke, su2double rho, su2double **PrimGrad, su2double *delta_dd, su2double dist) {}
 
   /*!
    * \brief Get the first blending function of the SST model.

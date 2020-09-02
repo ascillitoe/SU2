@@ -1129,11 +1129,11 @@ private:
   su2double uq_urlx;            /*!< \brief Under-relaxation factor */
   bool uq_permute;              /*!< \brief Permutation of eigenvectors */
 
-  bool using_sdd;               /*!< \brief Using SDD-RANS i.e. reading in aij_ML and blending this in */
-  bool write_sdd;               /*!< \brief Writing out aij_BL to give to ML */
-  su2double sdd_gamma_max;      /*!< \brief Maximum value of blending parameter gamma for SDD-RANS */
-  su2double sdd_alpha_max;      /*!< \brief Maximum value of blending parameter alpha for SDD-RANS */
-  unsigned long sdd_n_max;      /*!< \brief Number of iterations at which gamma and alpha reach gamma_max and alpha_max */
+  bool using_dd;               /*!< \brief Using DD-RANS i.e. reading in aij_ML and blending this in */
+  bool write_dd;               /*!< \brief Writing out aij_BL to give to ML */
+  su2double dd_gamma_max;      /*!< \brief Maximum value of blending parameter gamma for DD-RANS */
+  su2double dd_alpha_max;      /*!< \brief Maximum value of blending parameter alpha for DD-RANS */
+  unsigned long dd_n_max;      /*!< \brief Number of iterations at which gamma and alpha reach gamma_max and alpha_max */
   bool write_dist;              /*!< \brief Write wall distance to flow file */
 
   unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
@@ -8870,34 +8870,34 @@ public:
   bool GetUQ_Permute(void) const { return uq_permute; }
 
    /*!
-   * \brief Get information about whether to use stochastic data-driven RANS (SDD-RANS)
-   * \return <code>TRUE</code> means that SDD-RANS will be used
+   * \brief Get information about whether to use stochastic data-driven RANS (DD-RANS)
+   * \return <code>TRUE</code> means that DD-RANS will be used
    */
-  bool GetUsing_SDD(void) const { return using_sdd; }
+  bool GetUsing_DD(void) const { return using_dd; }
 
    /*!
-   * \brief Get gamma_max value for SDD-RANS
-   * \return value of gamma_max for SDD-RANS
+   * \brief Get gamma_max value for DD-RANS
+   * \return value of gamma_max for DD-RANS
    */
-  su2double GetSDD_GammaMax(void) const { return sdd_gamma_max; }
+  su2double GetDD_GammaMax(void) const { return dd_gamma_max; }
 
    /*!
-   * \brief Get alpha_max value for SDD-RANS
-   * \return value of alpha_max for SDD-RANS
+   * \brief Get alpha_max value for DD-RANS
+   * \return value of alpha_max for DD-RANS
    */
-  su2double GetSDD_AlphaMax(void) const { return sdd_alpha_max; }
+  su2double GetDD_AlphaMax(void) const { return dd_alpha_max; }
 
    /*!
-   * \brief Get n_max value for SDD-RANS
-   * \return value of n_max for SDD-RANS
+   * \brief Get n_max value for DD-RANS
+   * \return value of n_max for DD-RANS
    */
-  unsigned long GetSDD_NMax(void) const { return sdd_n_max; }
+  unsigned long GetDD_NMax(void) const { return dd_n_max; }
 
   /*!
-   * \brief Get information about whether to use write out aij for ML training (as part of SDD-RANS)
+   * \brief Get information about whether to use write out aij for ML training (as part of DD-RANS)
    * \return <code>TRUE</code> means that aij will be written out in solution file
    */
-  bool GetWrite_SDD(void) const { return write_sdd; }
+  bool GetWrite_DD(void) const { return write_dd; }
 
   /*!
    * \brief Get information about whether to use write wall distance to file

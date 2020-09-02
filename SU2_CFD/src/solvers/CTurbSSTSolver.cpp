@@ -279,7 +279,7 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
   const su2double a1 = constants[7];
 
   const bool first_iter = (config->GetInnerIter() == 0);
-  bool using_sdd = (config->GetUsing_SDD());
+  bool using_dd = (config->GetUsing_DD());
 
   /*--- Compute turbulence gradients. ---*/
 
@@ -318,10 +318,10 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
 
     nodes->SetmuT(iPoint,muT);
 
-    if(first_iter && using_sdd){
+    if(first_iter && using_dd){
       su2double **PrimGrad = solver_container[FLOW_SOL]->GetNodes()->GetGradient_Primitive(iPoint);
-      su2double *delta_sdd = solver_container[FLOW_SOL]->GetNodes()->GetSDD(iPoint);
-      nodes->InitSDD(iPoint, muT, kine, rho, PrimGrad, delta_sdd, dist);
+      su2double *delta_dd = solver_container[FLOW_SOL]->GetNodes()->GetDD(iPoint);
+      nodes->InitDD(iPoint, muT, kine, rho, PrimGrad, delta_dd, dist);
     }
   }
 
@@ -335,7 +335,7 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
   /*--- Pick one numerics object per thread. ---*/
   CNumerics* numerics = numerics_container[SOURCE_FIRST_TERM + omp_get_thread_num()*MAX_TERMS];
 
-  bool using_sdd = (config->GetUsing_SDD());
+  bool using_dd = (config->GetUsing_DD());
 
   /*--- Loop over all points. ---*/
 
@@ -381,9 +381,9 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     numerics->SetCrossDiff(nodes->GetCrossDiff(iPoint),0.0);
 
-     /*--- Set Aij_ML if SDD-RANS ---*/
+     /*--- Set Aij_ML if DD-RANS ---*/
 
-    if (using_sdd){
+    if (using_dd){
       numerics->SetAijML(nodes->GetAijML(iPoint),nullptr);
       numerics->SetTKEML(nodes->GetTKEML(iPoint),0.0);
     }

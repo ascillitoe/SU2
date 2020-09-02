@@ -55,7 +55,7 @@ CIncNSSolver::CIncNSSolver(void) : CIncEulerSolver() {
   SlidingState      = nullptr;
   SlidingStateNodes = nullptr;
 
-  delta_SDD = nullptr;
+  delta_DD = nullptr;
 }
 
 CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short iMesh) : CIncEulerSolver() {
@@ -130,7 +130,7 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   MaxHF_Visc = nullptr; ForceViscous = nullptr; MomentViscous = nullptr;
   CSkinFriction = nullptr; HF_Visc = nullptr;
 
-  delta_SDD = nullptr; 
+  delta_DD = nullptr; 
 
   /*--- Set the gamma value ---*/
 
@@ -482,9 +482,9 @@ CIncNSSolver::CIncNSSolver(CGeometry *geometry, CConfig *config, unsigned short 
   HF_Visc    = new su2double[nMarker];
   MaxHF_Visc = new su2double[nMarker];
 
-  /*--- SDD-RANS arrays ---*/
-  if (config->GetUsing_SDD()) {
-    delta_SDD = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) delta_SDD[iVar]   = 0.0;
+  /*--- DD-RANS arrays ---*/
+  if (config->GetUsing_DD()) {
+    delta_DD = new su2double[6]; for (iVar = 0; iVar < 6; iVar++) delta_DD[iVar]   = 0.0;
   }
 
   /*--- Init total coefficients ---*/
@@ -693,8 +693,8 @@ CIncNSSolver::~CIncNSSolver(void) {
     delete [] HeatConjugateVar;
   }
 
-  if (delta_SDD != nullptr) {
-    delete [] delta_SDD;
+  if (delta_DD != nullptr) {
+    delete [] delta_DD;
   }
 }
 
@@ -1087,7 +1087,7 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
   unsigned long iPoint, jPoint, iEdge;
 
   bool implicit = (config->GetKind_TimeIntScheme() == EULER_IMPLICIT);
-  bool using_sdd = (config->GetUsing_SDD());
+  bool using_dd = (config->GetUsing_DD());
 
   for (iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
 
@@ -1115,9 +1115,9 @@ void CIncNSSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contai
       numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0),
                                      solver_container[TURB_SOL]->GetNodes()->GetSolution(jPoint,0));
 
-    /*--- Set Aij_ML if SDD-RANS ---*/
+    /*--- Set Aij_ML if DD-RANS ---*/
 
-    if (using_sdd){
+    if (using_dd){
       numerics->SetAijML(solver_container[TURB_SOL]->GetNodes()->GetAijML(iPoint),
                          solver_container[TURB_SOL]->GetNodes()->GetAijML(jPoint));
       numerics->SetTKEML(solver_container[TURB_SOL]->GetNodes()->GetTKEML(iPoint),

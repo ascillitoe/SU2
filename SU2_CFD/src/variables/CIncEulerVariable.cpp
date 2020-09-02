@@ -128,8 +128,8 @@ CIncEulerVariable::CIncEulerVariable(su2double pressure, const su2double *veloci
   Non_Physical.resize(nPoint) = false;
   Non_Physical_Counter.resize(nPoint) = 0;
 
-  if (config->GetUsing_SDD()) {
-    delta_SDD.resize(nPoint,6) = su2double(0.0);
+  if (config->GetUsing_DD()) {
+    delta_DD.resize(nPoint,6) = su2double(0.0);
   }  
 
 }

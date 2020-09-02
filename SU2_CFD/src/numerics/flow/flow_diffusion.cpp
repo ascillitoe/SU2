@@ -133,7 +133,7 @@ void CAvgGrad_Base::SetStressTensor(const su2double *val_primvar,
 
   /* --- If UQ methodology is used, calculate tau using the perturbed reynolds stress tensor --- */
 
-  if (using_uq || using_sdd){
+  if (using_uq || using_dd){
     for (iDim = 0 ; iDim < nDim; iDim++)
       for (jDim = 0 ; jDim < nDim; jDim++)
         tau[iDim][jDim] = val_laminar_viscosity*( val_gradprimvar[jDim+1][iDim] + val_gradprimvar[iDim+1][jDim] )
@@ -824,9 +824,9 @@ CNumerics::ResidualType<> CAvgGradInc_Flow::ComputeResidual(const CConfig* confi
                     dist_ij_2, nVar);
   }
 
-  /*--- Set turbulent Reynolds stress tensor if SDD-RANS ---*/
+  /*--- Set turbulent Reynolds stress tensor if DD-RANS ---*/
 
-  if (using_sdd){
+  if (using_dd){
     for (iDim = 0; iDim < 3; iDim++) {
       for (jDim = 0; jDim < 3; jDim++) {
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
@@ -1157,9 +1157,9 @@ CNumerics::ResidualType<> CGeneralAvgGrad_Flow::ComputeResidual(const CConfig* c
     SetPerturbedRSM(Mean_turb_ke, config);
   }
 
-  /*--- Set turbulent Reynolds stress tensor if SDD-RANS ---*/
+  /*--- Set turbulent Reynolds stress tensor if DD-RANS ---*/
 
-  if (using_sdd){
+  if (using_dd){
     for (iDim = 0; iDim < 3; iDim++) {
       for (jDim = 0; jDim < 3; jDim++) {
         Aij_ML[iDim][jDim] = 0.5*(Aij_ML_i[iDim][jDim]+Aij_ML_j[iDim][jDim]);
@@ -1219,9 +1219,9 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     S_ij[iDim]   = new su2double [3];
     Aij_BL[iDim] = new su2double [3];
   }
-  su2double gamma_max = config->GetSDD_GammaMax();
-  su2double alpha_max = config->GetSDD_AlphaMax();
-  su2double n_max     = config->GetSDD_NMax();
+  su2double gamma_max = config->GetDD_GammaMax();
+  su2double alpha_max = config->GetDD_AlphaMax();
+  su2double n_max     = config->GetDD_NMax();
   unsigned long iter  = config->GetInnerIter();
   su2double rho       = Mean_PrimVar[nDim+2];
   su2double muT       = Mean_Eddy_Viscosity;
@@ -1246,7 +1246,7 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  /*--- Compute SDD-RANS blending parameters gamma and alpha ---*/
+  /*--- Compute DD-RANS blending parameters gamma and alpha ---*/
   su2double gamma = gamma_max*min(1.0,iter/n_max);
   su2double alpha = alpha_max*min(1.0,iter/n_max);
 

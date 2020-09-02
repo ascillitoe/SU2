@@ -43,8 +43,8 @@ private:
 
   VectorType DES_LengthScale;
 
-  /*--- SDD-RANS delta's ---*/
-  MatrixType delta_SDD;                    /*!< \brief delta SDD vector to be read in. Currently only eigenvalue delta's in cartesian 
+  /*--- DD-RANS delta's ---*/
+  MatrixType delta_DD;                    /*!< \brief delta DD vector to be read in. Currently only eigenvalue delta's in cartesian 
 				     co-ords ( delta_zeta, delta_eta ). 6D vector to make space for log(k) and eigenvector delta's later.  */
   /*!
    * \brief Get the mean rate of strain matrix based on velocity gradients
@@ -148,13 +148,13 @@ public:
   inline su2double GetDES_LengthScale(unsigned long iPoint) const override { return DES_LengthScale(iPoint); }
 
     /*!
-   * \brief Set the value of the delta_SDD vector for all indices.
+   * \brief Set the value of the delta_DD vector for all indices.
    * \param[in] iPoint - Point index.
-   * \param[in] val_delta - delta_SDD value.
-   * \return Set the value of delta_SDD for all indices.
+   * \param[in] val_delta - delta_DD value.
+   * \return Set the value of delta_DD for all indices.
    */
-  inline void SetSDD(unsigned long iPoint, const su2double *val_delta) {
-    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_SDD(iPoint,iVar) = val_delta[iVar];
+  inline void SetDD(unsigned long iPoint, const su2double *val_delta) {
+    for (unsigned long iVar = 0; iVar < 6; iVar++) delta_DD(iPoint,iVar) = val_delta[iVar];
   }
 
 };
