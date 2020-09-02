@@ -2778,7 +2778,10 @@ void CConfig::SetConfig_Options() {
   /* DESCRIPTION: Maximum value of blending parameter gamma to use for SDD */
   addDoubleOption("SDD_GAMMA_MAX", sdd_gamma_max, 1.0);
 
-  /* DESCRIPTION: Number of iterations after which gamma is fixed to gamma_max */
+  /* DESCRIPTION: Maximum value of blending parameter alpha to use for SDD */
+  addDoubleOption("SDD_ALPHA_MAX", sdd_alpha_max, 1.0);
+
+  /* DESCRIPTION: Number of iterations after which gamma and alpha are fixed to gamma_max and alpha_max */
   addUnsignedLongOption("SDD_N_MAX", sdd_n_max, 1000);
 
   /* DESCRIPTION: Using Uncertainty Quantification with SST Turbulence Model */

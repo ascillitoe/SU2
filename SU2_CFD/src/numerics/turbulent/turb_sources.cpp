@@ -1116,6 +1116,7 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     Aij_BL[iDim] = new su2double [3];
   }
   su2double gamma_max = config->GetSDD_GammaMax();
+  su2double alpha_max = config->GetSDD_AlphaMax();
   su2double n_max     = config->GetSDD_NMax();
   unsigned long iter  = config->GetInnerIter();
   su2double rho       = Density_i;
@@ -1141,9 +1142,9 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  /*--- Compute SDD-RANS blending parameter gamma ---*/
-  //su2double gamma = gamma_max*min(1.0,floor(10.*iter/n_max)/10.);
+  /*--- Compute SDD-RANS blending parameters gamma and alpha ---*/
   su2double gamma = gamma_max*min(1.0,iter/n_max);
+  su2double alpha = alpha_max*min(1.0,iter/n_max);
 
   /*--- BLend Aij_BL and Aij_ML together ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
@@ -1152,8 +1153,8 @@ void CSourcePieceWise_TurbSST::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  // TODO - blend exact tke and ML one
-  su2double new_turb_ke = (1.0-gamma)*turb_ke + gamma*TKE_ML_i;
+  // Blend exact tke and ML one
+  su2double new_turb_ke = (1.0-alpha)*turb_ke + alpha*TKE_ML_i;
 
   /*--- Set Reynolds stress tensor from new Aij tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {

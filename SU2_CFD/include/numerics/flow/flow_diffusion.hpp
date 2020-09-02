@@ -201,8 +201,6 @@ protected:
    */
   void SetBlendedAij(const CConfig* config);
 
-  void SetRijfromAij();
-
 public:
 
   /*!

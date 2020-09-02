@@ -1220,6 +1220,7 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     Aij_BL[iDim] = new su2double [3];
   }
   su2double gamma_max = config->GetSDD_GammaMax();
+  su2double alpha_max = config->GetSDD_AlphaMax();
   su2double n_max     = config->GetSDD_NMax();
   unsigned long iter  = config->GetInnerIter();
   su2double rho       = Mean_PrimVar[nDim+2];
@@ -1245,8 +1246,9 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  /*--- Compute SDD-RANS blending parameter gamma ---*/
+  /*--- Compute SDD-RANS blending parameters gamma and alpha ---*/
   su2double gamma = gamma_max*min(1.0,iter/n_max);
+  su2double alpha = alpha_max*min(1.0,iter/n_max);
 
   /*--- BLend Aij_BL and Aij_ML together ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
@@ -1255,8 +1257,8 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     }
   }
 
-  // TODO - blend exact tke and ML one
-  su2double new_turb_ke = (1.0-gamma)*turb_ke + gamma*TKE_ML_i;
+  // Blend exact tke and ML one
+  su2double new_turb_ke = (1.0-alpha)*turb_ke + alpha*TKE_ML_i;
 
   /*--- Set Reynolds stress tensor from new Aij tensor ---*/
   for (iDim = 0 ; iDim < 3; iDim++) {
@@ -1272,18 +1274,4 @@ void CAvgGrad_Base::SetBlendedAij(const CConfig* config)  {
     }
     delete [] S_ij;
     delete [] Aij_BL;
-}
-
-void CAvgGrad_Base::SetRijfromAij()  {
-
-  unsigned short iDim, jDim;
-  su2double turb_ke   = Mean_turb_ke; 
-
-  /*--- Set Reynolds stress tensor from new Aij tensor ---*/
-  for (iDim = 0 ; iDim < 3; iDim++) {
-    for (jDim = 0 ; jDim < 3; jDim++) {
-      MeanPerturbedRSM[iDim][jDim] = 2.0 * turb_ke * (Aij_new[iDim][jDim] + delta3[iDim][jDim]/3.0);
-    }
-  }
-
 }

@@ -1132,7 +1132,8 @@ private:
   bool using_sdd;               /*!< \brief Using SDD-RANS i.e. reading in aij_ML and blending this in */
   bool write_sdd;               /*!< \brief Writing out aij_BL to give to ML */
   su2double sdd_gamma_max;      /*!< \brief Maximum value of blending parameter gamma for SDD-RANS */
-  unsigned long sdd_n_max;      /*!< \brief Number of iterations at which gamma reaches gamma_max */
+  su2double sdd_alpha_max;      /*!< \brief Maximum value of blending parameter alpha for SDD-RANS */
+  unsigned long sdd_n_max;      /*!< \brief Number of iterations at which gamma and alpha reach gamma_max and alpha_max */
   bool write_dist;              /*!< \brief Write wall distance to flow file */
 
   unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
@@ -8879,6 +8880,12 @@ public:
    * \return value of gamma_max for SDD-RANS
    */
   su2double GetSDD_GammaMax(void) const { return sdd_gamma_max; }
+
+   /*!
+   * \brief Get alpha_max value for SDD-RANS
+   * \return value of alpha_max for SDD-RANS
+   */
+  su2double GetSDD_AlphaMax(void) const { return sdd_alpha_max; }
 
    /*!
    * \brief Get n_max value for SDD-RANS

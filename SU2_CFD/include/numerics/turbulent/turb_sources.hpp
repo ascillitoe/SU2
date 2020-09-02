@@ -345,8 +345,6 @@ private:
 
   void SetBlendedAij(const CConfig* config);
 
-  void SetRijfromAij();
-
 public:
   /*!
    * \brief Constructor of the class.
