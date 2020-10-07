@@ -76,8 +76,8 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSA::ComputeResidual(const CConfig
 //  AD::SetPreaccIn(Volume); AD::SetPreaccIn(dist_i);
 
 //  BC Transition Model variables
-  su2double vmag, rey, re_theta, re_theta_t, re_v;
-  su2double tu , nu_cr, nu_t, nu_BC, chi_1, chi_2, term1, term2, term_exponential;
+  su2double re_theta, re_theta_t, re_v;
+  su2double tu , nu_t, chi_1, chi_2, term1, term2, term_exponential;
 
   if (incompressible) {
     Density_i = V_i[nDim+2];
@@ -95,16 +95,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSA::ComputeResidual(const CConfig
   Jacobian_i[0]   = 0.0;
 
   gamma_BC = 0.0;
-  vmag = 0.0;
   tu   = config->GetTurbulenceIntensity_FreeStream();
-  rey  = config->GetReynolds();
-
-  if (nDim==2) {
-    vmag = sqrt(V_i[1]*V_i[1]+V_i[2]*V_i[2]);
-  }
-  else {
-    vmag = sqrt(V_i[1]*V_i[1]+V_i[2]*V_i[2]+V_i[3]*V_i[3]);
-  }
 
   /*--- Evaluate Omega ---*/
 
@@ -140,11 +131,9 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSA::ComputeResidual(const CConfig
 
 //    BC model constants
       chi_1 = 0.002;
-      chi_2 = 5.0;
+      chi_2 = 0.02;
 
       nu_t = (TurbVar_i[0]*fv1); //S-A variable
-      nu_cr = chi_2/rey;
-      nu_BC = (nu_t)/(vmag*dist_i);
 
       re_v   = ((Density_i*pow(dist_i,2.))/(Laminar_Viscosity_i))*Omega;
       re_theta = re_v/2.193;
@@ -152,7 +141,7 @@ CNumerics::ResidualType<> CSourcePieceWise_TurbSA::ComputeResidual(const CConfig
       //re_theta_t = 163.0 + exp(6.91-tu); //ABU-GHANNAM & SHAW correlation
 
       term1 = sqrt(max(re_theta-re_theta_t,0.)/(chi_1*re_theta_t));
-      term2 = sqrt(max(nu_BC-nu_cr,0.)/(nu_cr));
+      term2 = sqrt(max(nu_t/(chi_2*nu),0.));
       term_exponential = (term1 + term2);
       gamma_BC = 1.0 - exp(-term_exponential);
 
